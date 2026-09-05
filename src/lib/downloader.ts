@@ -1,7 +1,4 @@
 import { trackEvent } from "@/components/TrackComponents";
-import { http } from "./network";
-import { QrbtfModule } from "./qrbtf_lib/qrcodes/param";
-import { NEXT_PUBLIC_QRBTF_API_ENDPOINT } from "./env/client";
 
 function createDownloadTask(href: string, filename: string) {
   const a = document.createElement("a");
@@ -22,7 +19,7 @@ function svgToSvg(name: string, el: SVGSVGElement) {
 }
 
 const MIME = { jpg: "image/jpeg", png: "image/png" };
-interface SvgToImageOptions {
+export interface SvgToImageOptions {
   type: keyof typeof MIME;
   width: number;
   height: number;
@@ -33,7 +30,7 @@ function svgToImage(
   el: SVGSVGElement,
   options?: Partial<SvgToImageOptions>,
 ) {
-  const { type = "jpg", width = 1500, height = 1500 } = options || {};
+  const { type = "png", width = 2048, height = 2048 } = options || {};
 
   const $clone = el.cloneNode(true) as HTMLElement;
   $clone.setAttribute("width", width.toString());
@@ -46,7 +43,10 @@ function svgToImage(
 
   const ctx = canvas.getContext("2d");
   const img = document.createElement("img");
-  img.setAttribute("src", "data:image/svg+xml;base64," + btoa(svgData));
+  const base64Data = typeof window !== "undefined" && window.btoa
+    ? btoa(unescape(encodeURIComponent(svgData)))
+    : "";
+  img.setAttribute("src", "data:image/svg+xml;base64," + base64Data);
 
   img.onload = () => {
     if (!ctx) {
@@ -57,7 +57,7 @@ function svgToImage(
     if (type === "jpg") ctx.fillRect(0, 0, width, height);
     ctx.drawImage(img, 0, 0, width, height);
 
-    const data = canvas.toDataURL(MIME[type], 0.8);
+    const data = canvas.toDataURL(MIME[type], 0.95);
     createDownloadTask(data, `QRcode_${name}.${type}`);
   };
 }
@@ -89,33 +89,18 @@ function withReport(
   for (const type in downloaders) {
     const origin = downloaders[type];
     downloaders[type] = (options) => {
-      const { name, params, userId } = options;
-      const dataToReport = {
-        user_id: userId,
-        type: name,
-        ...params,
-      };
-      trackEvent("download_qrcode", dataToReport);
-      // WebKit bug: https://bugs.webkit.org/show_bug.cgi?id=270102
-      Promise.all([
-        http(`${NEXT_PUBLIC_QRBTF_API_ENDPOINT}/count/update_count`, {
-          method: "POST",
-          body: JSON.stringify({
-            collection_name: "counter_style",
-            name: name,
-          }),
-        }),
-        http(`${NEXT_PUBLIC_QRBTF_API_ENDPOINT}/count/update_count`, {
-          method: "POST",
-          body: JSON.stringify({
-            collection_name: "counter_global",
-            name: "download_count",
-          }),
-        }),
-        http(`${NEXT_PUBLIC_QRBTF_API_ENDPOINT}/user_stat/inc_download_count`, {
-          method: "POST",
-        }),
-      ]).finally(() => origin(options));
+      try {
+        const { name, params, userId } = options;
+        const dataToReport = {
+          user_id: userId,
+          type: name,
+          ...params,
+        };
+        trackEvent("download_qrcode", dataToReport);
+      } catch {
+        // Silent client-side fallback
+      }
+      origin(options);
     };
   }
   return downloaders;
@@ -123,23 +108,18 @@ function withReport(
 
 const SvgQrcodeDownloaders: Record<string, Downloader> = withReport({
   svg: ({ name, wrapper }) =>
-    svgToSvg(name, wrapper.firstChild as SVGSVGElement),
+    svgToSvg(name, wrapper.querySelector("svg") as SVGSVGElement || wrapper.firstChild as SVGSVGElement),
   jpg: ({ name, wrapper }) =>
-    svgToImage(name, wrapper.firstChild as SVGSVGElement, { type: "jpg" }),
+    svgToImage(name, wrapper.querySelector("svg") as SVGSVGElement || wrapper.firstChild as SVGSVGElement, { type: "jpg" }),
   png: ({ name, wrapper }) =>
-    svgToImage(name, wrapper.firstChild as SVGSVGElement, { type: "png" }),
-});
-const ApiFetcherQrcodeDownloaders: Record<string, Downloader> = withReport({
-  jpg: ({ name, wrapper }) =>
-    srcToImage(name, wrapper.getElementsByTagName("img")[0].src),
+    svgToImage(name, wrapper.querySelector("svg") as SVGSVGElement || wrapper.firstChild as SVGSVGElement, { type: "png" }),
 });
 
 const downloaderMaps: Record<
-  QrbtfModule<void>["type"],
+  string,
   Record<string, Downloader>
 > = {
   svg_renderer: SvgQrcodeDownloaders,
-  api_fetcher: ApiFetcherQrcodeDownloaders,
 };
 
-export { downloaderMaps };
+export { downloaderMaps, svgToSvg, svgToImage };

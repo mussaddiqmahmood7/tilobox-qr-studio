@@ -24,7 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn, useCurrentQrcodeType } from "@/lib/utils";
-import { Loader2, LucideDownload } from "lucide-react";
+import { LucideDownload } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { StyleTitle } from "@/components/Titles";
 import { useAtomValue } from "jotai";
@@ -36,7 +36,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import useGenAiImage from "@/lib/qrbtf_lib/qrcodes/hooks/use_gen_ai_image";
 import { CommonControlProps, QrbtfModule } from "@/lib/qrbtf_lib/qrcodes/param";
 import {
   Select,
@@ -45,7 +44,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { useSession } from "@/lib/latentcat-auth/client";
 
 export interface QrcodeGeneratorProps<P extends {}>
   extends HTMLAttributes<HTMLDivElement> {
@@ -61,7 +59,6 @@ export interface QrcodeGeneratorProps<P extends {}>
 export function QrcodeGenerator<P extends {}>(props: QrcodeGeneratorProps<P>) {
   const t = useTranslations("index.params");
   const url = useAtomValue(urlAtom);
-  const { onSubmit, generating, resData } = useGenAiImage();
 
   const { params, defaultPreset } = props;
   const presets = props.qrcodeModule.presets;
@@ -79,7 +76,6 @@ export function QrcodeGenerator<P extends {}>(props: QrcodeGeneratorProps<P>) {
   };
 
   // Download
-  const { data: session } = useSession();
   const qrcodeWrapperRef = useRef<HTMLDivElement | null>(null);
   const currentQrcodeType = useCurrentQrcodeType();
 
@@ -158,31 +154,6 @@ export function QrcodeGenerator<P extends {}>(props: QrcodeGeneratorProps<P>) {
 
           <SplitRight>
             <div className="sticky top-24">
-              {props.qrcodeModule.type === "api_fetcher" && (
-                <Button
-                  disabled={generating}
-                  className="w-full mb-6"
-                  onClick={() => {
-                    if (url.length > 150) {
-                      toast.error(t("url_too_long"));
-                      return;
-                    }
-                    const prompt = form.getValues(
-                      "prompt" as Path<unknown>,
-                    ) as string;
-                    if (prompt.length > 1024) {
-                      toast.error(t("prompt_too_long"));
-                      return;
-                    }
-                    onSubmit(form.getValues());
-                  }}
-                >
-                  {generating && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  {t("generate")}
-                </Button>
-              )}
               <div className="">
                 <Label
                   className="flex items-center justify-between mb-1.5"
@@ -203,7 +174,7 @@ export function QrcodeGenerator<P extends {}>(props: QrcodeGeneratorProps<P>) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       {Object.entries(
-                        downloaderMaps[props.qrcodeModule.type],
+                        downloaderMaps[props.qrcodeModule.type] || {},
                       ).map(([type, handler]) => (
                         <DropdownMenuItem
                           key={type}
@@ -213,7 +184,6 @@ export function QrcodeGenerator<P extends {}>(props: QrcodeGeneratorProps<P>) {
                                 name: currentQrcodeType,
                                 wrapper: qrcodeWrapperRef.current,
                                 params: componentProps,
-                                userId: session?.id,
                               });
                           }}
                         >
@@ -234,18 +204,11 @@ export function QrcodeGenerator<P extends {}>(props: QrcodeGeneratorProps<P>) {
                     ref={qrcodeWrapperRef}
                     className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center _bg-white"
                   >
-                    {props.qrcodeModule.type === "svg_renderer" && (
-                      <>
-                        {props.qrcodeModule.renderer({
-                          className: "w-full bg-white",
-                          url: url || "https://qrbtf.com",
-                          ...componentProps,
-                        })}
-                      </>
-                    )}
-                    {props.qrcodeModule.type === "api_fetcher" && (
-                      <>{props.qrcodeModule.visualizer({ data: resData })}</>
-                    )}
+                    {props.qrcodeModule.renderer({
+                      className: "w-full bg-white",
+                      url: url || "https://tilobox.com",
+                      ...componentProps,
+                    })}
                   </div>
                 </div>
               </div>

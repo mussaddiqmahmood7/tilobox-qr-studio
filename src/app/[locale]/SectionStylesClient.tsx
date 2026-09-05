@@ -25,7 +25,7 @@ export function SectionStylesClient() {
   });
 
   const render = (item: QrStyleItemProps, index: number) => {
-    const itemPath = item.id === "g1" ? "/" : `/style/${item.id}`;
+    const itemPath = item.id === "a1" ? "/" : `/style/${item.id}`;
     const isActive = currentQrcodeType === item.id;
     return (
       <div
