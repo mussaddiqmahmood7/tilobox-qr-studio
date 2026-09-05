@@ -1,8 +1,9 @@
 import { useTranslations } from "next-intl";
 import { QrbtfRendererC2Props } from "./c2";
-import DefaultBackground from "/public/assets/images/c2_background.inline.jpg";
 import { CommonControlProps } from "./param";
 import { useCommonParams } from "./param/common";
+
+const DefaultBackground = "/assets/images/c2_background.inline.jpg";
 
 export type C2PresetKeys = "c2";
 
@@ -11,7 +12,7 @@ export const C2Presets: Record<C2PresetKeys, QrbtfRendererC2Props> = {
     correct_level: "high",
     brightness: 0,
     contrast: 0,
-    background: DefaultBackground as unknown as string,
+    background: DefaultBackground,
     align_type: "none",
     timing_type: "none",
   },

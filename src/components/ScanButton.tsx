@@ -59,6 +59,7 @@ export function ScanButton(props: { name: string }) {
     return () => {
       removeListener();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

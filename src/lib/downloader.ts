@@ -1,4 +1,4 @@
-﻿import { trackEvent } from "@/components/TrackComponents";
+import { trackEvent } from "@/components/TrackComponents";
 import { CenterLogoConfig } from "./states";
 
 function createDownloadTask(href: string, filename: string) {
@@ -111,7 +111,7 @@ export function svgToImage(
   const ctx = canvas.getContext("2d");
   const img = document.createElement("img");
   const base64Data =
-    typeof window !== "undefined" && window.btoa
+    typeof window !== "undefined"
       ? btoa(unescape(encodeURIComponent(svgData)))
       : "";
   img.setAttribute("src", "data:image/svg+xml;base64," + base64Data);

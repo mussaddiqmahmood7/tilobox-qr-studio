@@ -1,4 +1,4 @@
-﻿import { type Metadata, Viewport } from "next";
+import { type Metadata, Viewport } from "next";
 import { getTranslations } from "next-intl/server";
 import React from "react";
 
@@ -79,6 +79,7 @@ export const layoutViewport: Viewport = {
 
 export function LayoutHead() {
   return (
+    // eslint-disable-next-line @next/next/no-head-element
     <head>
       <link rel="manifest" href="/manifest.json" />
       <link rel="icon" href="/favicon.ico" sizes="any" />

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import {
@@ -104,7 +104,7 @@ export function TentCardExportModal({
                 Print 4x6 Card (Cardstock)
               </Button>
               <p className="text-[11px] text-muted-foreground mt-1.5 text-center">
-                Uses standard 4" x 6" photo or cardstock print dimensions.
+                Uses standard 4&quot; x 6&quot; photo or cardstock print dimensions.
               </p>
             </div>
           </div>

@@ -1,13 +1,11 @@
 import { ControllerRenderProps, DefaultValues, Path } from "react-hook-form";
 
-export type QrbtfModule<P, PresetKeys extends string = string> = (
-  | QrbtfModuleSvgRenderer<P>
-  | QrbtfModuleApiFetcher<P>
-) & { presets: Record<PresetKeys, DefaultValues<P>> };
+export type QrbtfModule<P, PresetKeys extends string = string> =
+  QrbtfModuleSvgRenderer<P> & { presets: Record<PresetKeys, DefaultValues<P>> };
 
 export interface QrbtfModuleSvgRenderer<P> {
   type: "svg_renderer";
-  renderer: (props: P & { url: string }) => React.ReactNode;
+  renderer: (props: P & { url: string; className?: string }) => React.ReactNode;
 }
 
 export interface QrbtfModuleApiFetcher<P> {

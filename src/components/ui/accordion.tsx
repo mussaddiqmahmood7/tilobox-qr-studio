@@ -17,6 +17,7 @@ const Accordion = React.forwardRef<
     {...props}
   />
 ));
+Accordion.displayName = "Accordion";
 
 const AccordionItem = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Item>,
