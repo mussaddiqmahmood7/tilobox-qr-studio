@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useRef } from "react";
 import { useAtom } from "jotai";
@@ -9,6 +9,12 @@ import { Button } from "@/components/ui/button";
 import { UploadCloud, Image as ImageIcon, Trash2, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+
+const TILOBOX_EMBLEM_DATA_URL =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#0b0f19"/><rect x="24" y="24" width="464" height="464" rx="88" fill="none" stroke="#1e293b" stroke-width="12"/><rect x="40" y="40" width="432" height="432" rx="72" fill="none" stroke="#1e293b" stroke-width="4" stroke-opacity="0.5"/><g fill="#10b981"><path d="M 168 152 L 376 152 L 376 184 L 344 216 L 136 216 L 136 184 Z"/><path d="M 224 232 L 288 232 L 288 328 L 256 360 L 224 328 Z"/></g></svg>',
+  );
 
 export function CenterLogoControl() {
   const [logoConfig, setLogoConfig] = useAtom(centerLogoAtom);
@@ -54,7 +60,7 @@ export function CenterLogoControl() {
   const handleUseTiloBoxEmblem = () => {
     setLogoConfig((prev) => ({
       ...prev,
-      url: "/icon.svg",
+      url: TILOBOX_EMBLEM_DATA_URL,
       mask: "rounded",
       size: 18,
     }));
