@@ -1,5 +1,5 @@
 {
-  "name": "qrbtf-v3",
+  "name": "tilobox-qr-studio",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,8 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint --max-warnings=0",
-    "format": "prettier . --write",
-    "prepare": "husky install"
+    "format": "prettier . --write"
   },
   "requires": true,
   "dependencies": {
