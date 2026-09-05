@@ -40,21 +40,20 @@ export function SectionStylesClient() {
   };
 
   const render = (item: QrStyleItemProps, index: number) => {
-    const itemPath = item.id === "a1" ? "/" : `/style/${item.id}`;
     const isActive = activeStyle === item.id;
     return (
       <div
         key={"qrcode_style_" + index}
         className={cn(
-          "snap-start pl-6 -ml-3 sm:pl-0 sm:ml-0 transition-opacity cursor-pointer",
-          isActive ? "" : "dark:opacity-70",
+          "snap-start transition-all cursor-pointer select-none shrink-0",
+          isActive ? "scale-[1.02]" : "opacity-75 hover:opacity-100 hover:scale-[1.01]"
         )}
         onClick={(e) => handleSelectStyle(item.id, e)}
       >
         <div className="block">
           <motion.div
             className={cn(
-              "relative w-[calc((100vw-(12px)*5)/2)] sm:w-[195px] rounded-2xl bg-accent/30 overflow-hidden",
+              "relative w-[140px] sm:w-[170px] lg:w-[195px] rounded-2xl bg-accent/30 overflow-hidden shadow-xs",
             )}
             whileTap={{
               scale: 0.95,
@@ -83,8 +82,8 @@ export function SectionStylesClient() {
               className={cn(
                 "absolute top-0 left-0 w-full h-full rounded-2xl ring ring-inset",
                 isActive
-                  ? "ring-2 ring-foreground"
-                  : "ring-1 ring-border dark:hidden",
+                  ? "ring-2 ring-primary"
+                  : "ring-1 ring-border/80 dark:hidden",
               )}
             ></div>
           </motion.div>
@@ -94,35 +93,30 @@ export function SectionStylesClient() {
   };
 
   return (
-    <div className="mt-9">
+    <div className="mt-8">
       <Container>
-        <Label className="flex justify-between text-sm font-medium mb-2">
-          {t("title")}
-          <span className="ml-3 font-normal text-foreground/50">
-            {t("subtitle")}
+        <div className="flex items-center justify-between mb-3">
+          <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <span>{t("title")}</span>
+            <span className="text-xs font-normal text-muted-foreground hidden sm:inline">
+              — {t("subtitle")}
+            </span>
+          </Label>
+          <span className="text-[11px] text-muted-foreground sm:hidden">
+            Swipe for styles →
           </span>
-        </Label>
-      </Container>
+        </div>
 
-      <div
-        className="overflow-x-auto no-scrollbar snap-x sm:snap-none snap-mandatory"
-        {...events}
-        ref={ref} // add reference and events to the wrapping div
-      >
-        <div className="flex flex-col">
-          <div className="w-full flex flex-col items-center sm:px-6 lg:px-12">
-            <div className="w-full max-w-5xl">
-              <div className="flex sm:gap-3">
-                <div className="w-3 shrink-0 sm:hidden" />
-
-                {qrStyleList.map((item, index) => render(item, index))}
-
-                <div className="w-6 shrink-0" />
-              </div>
-            </div>
+        <div
+          className="w-full overflow-x-auto no-scrollbar snap-x snap-mandatory py-1"
+          {...events}
+          ref={ref}
+        >
+          <div className="flex gap-3 min-w-max pb-2">
+            {qrStyleList.map((item, index) => render(item, index))}
           </div>
         </div>
-      </div>
+      </Container>
     </div>
   );
 }

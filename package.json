@@ -63,6 +63,7 @@
     "html5-qrcode": "^2.3.8",
     "input-otp": "^1.1.0",
     "jotai": "^2.7.0",
+    "jsqr": "^1.4.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.356.0",
     "mixpanel-browser": "^2.49.0",

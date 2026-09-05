@@ -1,322 +1,183 @@
 "use client";
 
+import React, { useState } from "react";
 import Link from "next/link";
-import { clsx } from "clsx";
-import React, { useEffect } from "react";
-import { ArrowTopRightIcon } from "@radix-ui/react-icons";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
-import { transitionMd, transitionLg } from "@/lib/animations";
 import { BrandMark } from "@/components/BrandMark";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
-import { Container } from "@/components/Containers";
+import LocaleSwitcher from "@/components/LocaleSwitcher";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Github, Menu, ExternalLink, ShieldCheck, Sparkles } from "lucide-react";
 
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { usePathname } from "@/navigation";
-import { trackEvent, TrackLink } from "@/components/TrackComponents";
-
-const scrollTopAtom = atom(true);
-const scrollTitleAtom = atom(true);
-const menuOpenAtom = atom(false);
-
-interface HeaderLinkProps {
-  name: string;
-  href: string;
-  target?: string;
-  onClick?: () => void;
-}
-
-interface HeaderProps {
-  links: {
-    name: string;
-    href: string;
-    target?: string;
-  }[];
-}
-
-function Logo() {
-  const setMenuOpen = useSetAtom(menuOpenAtom);
-  return (
-    <TrackLink
-      trackValue={["logo", "header"]}
-      href="/"
-      className="flex h-14 items-center gap-2.5 transition-opacity hover:opacity-90"
-      onClick={() => setMenuOpen(false)}
-    >
-      <BrandMark className="h-8 w-8 rounded-lg shadow-xs transition-transform hover:scale-105" />
-      <div className="flex items-center gap-2">
-        <span className="text-xl font-black tracking-tight text-foreground">
-          Tilo<span className="text-primary">Box</span>
-        </span>
-        <span className="hidden border-l border-border pl-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:inline">
-          QR Studio
-        </span>
-      </div>
-    </TrackLink>
-  );
-}
-
-export function HeroLogo() {
-  return (
-    <div className="flex items-center gap-3.5">
-      <BrandMark className="h-12 w-12 lg:h-14 lg:w-14 rounded-2xl shadow-md" />
-      <div>
-        <div className="text-3xl lg:text-4xl font-black tracking-tight text-foreground flex items-center gap-2.5">
-          <span>
-            Tilo<span className="text-primary">Box</span>
-          </span>
-          <span className="text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full">
-            QR Studio
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function BorderBottom() {
-  const isTop = useAtomValue(scrollTopAtom);
-  return (
-    <motion.div
-      initial={{ opacity: isTop ? 0 : 1 }}
-      animate={{ opacity: isTop ? 0 : 1 }}
-      className="absolute bottom-0 left-0 h-[1px] w-full bg-border/60"
-    />
-  );
-}
-
-function MobileNavItem(props: HeaderLinkProps) {
-  return (
-    <li>
-      <TrackLink
-        trackValue={["mobile_nav", props.name]}
-        href={props.href}
-        target={props.target}
-        onClick={props.onClick}
-        className="py-2.5 font-bold text-lg flex items-center text-foreground hover:text-primary transition-colors"
-      >
-        {props.name}
-        {props.target && <ArrowTopRightIcon className="w-5 h-5 ml-1.5 opacity-70" />}
-      </TrackLink>
-    </li>
-  );
-}
-
-function MobileNavigation(
-  props: HeaderProps & React.ComponentPropsWithoutRef<"div">,
-) {
-  const [menuOpen, setMenuOpen] = useAtom(menuOpenAtom);
-  const pathname = usePathname();
-
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname, setMenuOpen]);
-
-  useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [menuOpen]);
+export function Header() {
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <>
-      <div
-        className={clsx(
-          "fixed top-0 z-40 w-full bg-background/90 backdrop-blur-md h-14 flex md:hidden items-center justify-between px-4 sm:px-6 border-b border-border/60",
-          props.className,
-        )}
-      >
-        <Logo />
-        <div className="flex items-center gap-2">
-          <ThemeSwitcher />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-lg h-9 w-9 text-foreground hover:bg-muted"
-            aria-label="Toggle navigation menu"
-            onClick={() => {
-              trackEvent("toggle_menu", { to: !menuOpen });
-              setMenuOpen(!menuOpen);
-            }}
+    <header className="no-print sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+      <div className="w-full flex justify-center px-6 lg:px-12">
+        <nav className="w-full max-w-5xl flex h-16 items-center justify-between gap-4">
+          {/* Brand Logo & Studio Identity */}
+          <Link
+            href="/"
+            className="group flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-90"
+            aria-label="TiloBox QR Studio"
           >
-            {!menuOpen ? (
-              <Bars3Icon className="h-5 w-5 stroke-foreground" />
-            ) : (
-              <XMarkIcon className="h-5 w-5 text-foreground" />
-            )}
-          </Button>
-        </div>
-      </div>
+            <BrandMark className="h-9 w-9 rounded-xl shadow-xs transition-transform group-hover:scale-105" />
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-black tracking-tight text-foreground">
+                Tilo<span className="text-primary">Box</span>
+              </span>
+              <span className="hidden border-l border-border pl-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:inline">
+                QR Studio
+              </span>
+            </div>
+          </Link>
 
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            key="mobile-drawer"
-            className="fixed inset-0 z-50 flex flex-col bg-background/98 backdrop-blur-xl md:hidden"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-          >
-            <div className="flex h-14 items-center justify-between px-4 sm:px-6 border-b border-border/60">
-              <Logo />
-              <div className="flex items-center gap-2">
-                <ThemeSwitcher />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-lg h-9 w-9 text-foreground hover:bg-muted"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  <XMarkIcon className="h-5 w-5 text-foreground" />
-                </Button>
-              </div>
+          {/* Desktop Controls (matches my-invoice-app) */}
+          <div className="hidden items-center gap-3 sm:flex">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <LocaleSwitcher />
             </div>
 
-            <div className="flex flex-col flex-1 px-6 py-6 overflow-y-auto">
-              <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
-                Navigation
-              </div>
-              <ul className="flex flex-col gap-2">
-                {props.links.map((item, index) => (
-                  <MobileNavItem
-                    key={"mobile_nav_" + index}
-                    {...item}
-                    onClick={() => setMenuOpen(false)}
-                  />
-                ))}
-              </ul>
+            <div className="h-4 w-[1px] bg-border/60" />
 
-              <div className="mt-8 pt-6 border-t border-border/60 flex flex-col gap-3">
-                <a
-                  href="https://tilobox.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground py-3 font-semibold text-sm shadow-sm hover:opacity-90 transition-opacity"
-                >
-                  Visit TiloBox Platform
-                  <ArrowTopRightIcon className="w-4 h-4" />
-                </a>
-                <p className="text-[11px] text-center text-muted-foreground mt-2">
-                  TiloBox QR Studio • 100% In-Browser & Private
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
-}
-
-function NavItem(props: HeaderLinkProps) {
-  const pathname = usePathname();
-  const isActive = pathname === props.href;
-
-  return (
-    <li>
-      <TrackLink
-        trackValue={["desktop_nav", props.name]}
-        href={props.href}
-        target={props.target}
-        className={clsx(
-          "relative flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors",
-          isActive
-            ? "text-foreground font-semibold bg-accent/40"
-            : "text-muted-foreground hover:text-foreground hover:bg-accent/20",
-        )}
-      >
-        {props.name}
-        {props.target && <ArrowTopRightIcon className="w-3.5 h-3.5 ml-1 opacity-70" />}
-      </TrackLink>
-    </li>
-  );
-}
-
-function DesktopNavigation(
-  props: HeaderProps & React.ComponentPropsWithoutRef<"nav">,
-) {
-  return (
-    <div
-      className={clsx(
-        "fixed top-0 z-20 w-full bg-background/85 backdrop-blur hidden md:flex border-b border-border/60",
-        props.className,
-      )}
-    >
-      <Container>
-        <div className="h-14 flex items-center justify-between">
-          <Logo />
-          <div className="flex items-center gap-3">
-            <nav>
-              <ul className="flex text-sm font-medium items-center gap-1">
-                {props.links.map((item, index) => (
-                  <NavItem key={index} {...item} />
-                ))}
-              </ul>
-            </nav>
-            <div className="h-4 w-[1px] bg-border" />
             <ThemeSwitcher />
+
+            <a
+              href="https://github.com/mussaddiqmahmood7/tilobox-qr-studio"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card/60 text-muted-foreground transition-colors hover:border-primary/40 hover:bg-card hover:text-foreground shadow-2xs"
+              aria-label="Star on GitHub"
+              title="Star on GitHub"
+            >
+              <Github className="h-4 w-4" />
+            </a>
+
             <a
               href="https://tilobox.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs font-semibold rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all px-3 py-1.5"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground border border-primary/20 transition-all px-3 py-2 shadow-2xs"
             >
-              tilobox.com
-              <ArrowTopRightIcon className="w-3.5 h-3.5" />
+              <span>tilobox.com</span>
+              <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>
-        </div>
-      </Container>
-    </div>
-  );
-}
 
-export function Header() {
-  const headerLinks = [
-    {
-      name: "TiloBox Ecosystem",
-      href: "https://tilobox.com",
-      target: "_blank",
-    },
-    {
-      name: "GitHub",
-      href: "https://github.com/mussaddiqmahmood7/tilobox-qr-studio",
-      target: "_blank",
-    },
-  ];
+          {/* Mobile Controls (Smooth Sheet drawer overlay) */}
+          <div className="flex items-center gap-2 sm:hidden">
+            <ThemeSwitcher />
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-lg h-9 w-9 text-foreground hover:bg-muted"
+                  aria-label="Open menu"
+                >
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                side="right"
+                className="w-[85vw] max-w-sm flex flex-col justify-between p-6"
+              >
+                <div>
+                  <SheetHeader className="mb-6 text-start">
+                    <div className="flex items-center gap-2.5">
+                      <BrandMark className="h-8 w-8 rounded-lg shadow-xs" />
+                      <div>
+                        <SheetTitle className="text-base font-black tracking-tight text-foreground">
+                          Tilo<span className="text-primary">Box</span> QR Studio
+                        </SheetTitle>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          100% In-Browser & Private Studio
+                        </p>
+                      </div>
+                    </div>
+                  </SheetHeader>
 
-  const setIsTop = useSetAtom(scrollTopAtom);
-  const setIsTitle = useSetAtom(scrollTitleAtom);
+                  <div className="flex flex-col gap-5 pt-2">
+                    {/* Language Setting */}
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        Language
+                      </span>
+                      <div className="border border-border/80 rounded-xl p-2 bg-card/50">
+                        <LocaleSwitcher />
+                      </div>
+                    </div>
 
-  useEffect(() => {
-    function handleScroll() {
-      const scrollTop =
-        window.pageYOffset || document.documentElement.scrollTop;
-      setIsTop(scrollTop <= 0);
-      setIsTitle(scrollTop <= 100);
-    }
-    handleScroll();
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [setIsTop, setIsTitle]);
+                    {/* Ecosystem Links */}
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        Open Source & Ecosystem
+                      </span>
+                      <a
+                        href="https://github.com/mussaddiqmahmood7/tilobox-qr-studio"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center justify-between rounded-xl border border-border bg-card/60 px-3.5 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-card"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Github className="h-4 w-4 text-primary" />
+                          <span>GitHub Repository</span>
+                        </div>
+                        <span className="text-xs font-semibold text-primary">⭐ Star</span>
+                      </a>
 
-  return (
-    <>
-      <MobileNavigation links={headerLinks} />
-      <DesktopNavigation links={headerLinks} />
-    </>
+                      <a
+                        href="https://tilobox.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center justify-between rounded-xl border border-border bg-card/60 px-3.5 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-card"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <ExternalLink className="h-4 w-4 text-primary" />
+                          <span>TiloBox Platform</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">Directory</span>
+                      </a>
+                    </div>
+
+                    {/* Features list */}
+                    <div className="pt-2 border-t border-border/60 space-y-2">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <span>Zero server storage, 100% private</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+                        <span>High-res vector SVG & PNG export</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer of Drawer */}
+                <div className="pt-6 border-t border-border/60 text-center">
+                  <p className="text-[11px] text-muted-foreground">
+                    TiloBox Ecosystem • Built with Open-Source Love
+                  </p>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </nav>
+      </div>
+    </header>
   );
 }
 
 export function HeaderPadding() {
-  return <div className="h-14" />;
+  return null;
 }

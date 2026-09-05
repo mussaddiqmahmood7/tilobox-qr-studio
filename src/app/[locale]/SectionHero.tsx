@@ -7,10 +7,7 @@ import {
   SplitRight,
   SplitView,
 } from "@/components/Containers";
-import { ScanButton } from "@/components/ScanButton";
-import { Label } from "@/components/ui/label";
-import { UrlInput } from "@/components/hero/UrlInput";
-import { BusinessPresets } from "@/components/BusinessPresets";
+import { QrContentPanel } from "@/components/QrContentPanel";
 import { Sparkles, ShieldCheck } from "lucide-react";
 import { BrandMark } from "@/components/BrandMark";
 
@@ -51,20 +48,11 @@ export function SectionHero() {
           </div>
         </div>
 
-        {/* Business Presets & URL / Content Input */}
+        {/* Unified QR Content Creator (URL, WhatsApp, Phone, Wi-Fi, vCard, Text) */}
         <div className="mt-4">
           <SplitView className="gap-y-0">
             <SplitLeft>
-              <BusinessPresets />
-              <div className="mt-4 w-full">
-                <Label className="flex justify-between text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                  <span>{t("url")}</span>
-                  <div className="flex items-center gap-2">
-                    <ScanButton name={t("scan")} />
-                  </div>
-                </Label>
-                <UrlInput />
-              </div>
+              <QrContentPanel />
             </SplitLeft>
             <SplitRight />
           </SplitView>

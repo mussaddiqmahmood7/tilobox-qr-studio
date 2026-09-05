@@ -203,14 +203,13 @@ export function CenterLogoControl() {
           {/* Mask type buttons */}
           <div className="space-y-1.5">
             <span className="text-xs font-medium text-foreground block">
-              Protective Mask Shape
+              Protective Cushion Shape
             </span>
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className="grid grid-cols-2 gap-1.5">
               {(
                 [
-                  { id: "rounded", label: "Rounded" },
-                  { id: "circle", label: "Circular" },
-                  { id: "none", label: "Transparent" },
+                  { id: "rounded", label: "Rounded Cushion" },
+                  { id: "circle", label: "Circular Cushion" },
                 ] as const
               ).map((maskOption) => (
                 <button
@@ -236,7 +235,7 @@ export function CenterLogoControl() {
           <div className="flex items-start gap-2 p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[11px]">
             <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
             <span>
-              High Error Correction (Q/H) active: Redundant data points protect 30% of code area so center logo never breaks scanning.
+              High Error Correction (Level H - 30% Parity) active: Center protective cushion isolates the logo so smartphone cameras and scanners decode the QR code with 100% reliability.
             </span>
           </div>
         </div>

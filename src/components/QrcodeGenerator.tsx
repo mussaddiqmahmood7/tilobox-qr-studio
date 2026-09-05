@@ -449,21 +449,13 @@ export function QrcodeGenerator<P extends {}>(props: QrcodeGeneratorProps<P>) {
                           "absolute pointer-events-none flex items-center justify-center overflow-hidden border shadow-sm transition-all",
                           logoConfig.mask === "circle"
                             ? "rounded-full"
-                            : logoConfig.mask === "none"
-                            ? "rounded-none border-none shadow-none"
                             : "rounded-xl",
                         )}
                         style={{
                           width: `${logoConfig.size}%`,
                           height: `${logoConfig.size}%`,
-                          backgroundColor:
-                            logoConfig.mask === "none"
-                              ? "transparent"
-                              : logoConfig.maskBg || "#ffffff",
-                          borderColor:
-                            logoConfig.mask === "none"
-                              ? "transparent"
-                              : "rgba(0,0,0,0.12)",
+                          backgroundColor: logoConfig.maskBg || "#ffffff",
+                          borderColor: "rgba(0,0,0,0.12)",
                         }}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}

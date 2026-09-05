@@ -62,22 +62,21 @@ export function embedLogoInSvg(
   const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
   group.setAttribute("id", "tilobox-center-logo");
 
-  if (logoConfig.mask !== "none") {
-    const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    bg.setAttribute("x", (logoX - logoW * 0.06).toString());
-    bg.setAttribute("y", (logoY - logoH * 0.06).toString());
-    bg.setAttribute("width", (logoW * 1.12).toString());
-    bg.setAttribute("height", (logoH * 1.12).toString());
-    bg.setAttribute("fill", logoConfig.maskBg || "#ffffff");
-    if (logoConfig.mask === "circle") {
-      bg.setAttribute("rx", (logoW * 0.56).toString());
-      bg.setAttribute("ry", (logoH * 0.56).toString());
-    } else {
-      bg.setAttribute("rx", (logoW * 0.22).toString());
-      bg.setAttribute("ry", (logoH * 0.22).toString());
-    }
-    group.appendChild(bg);
+  // Clean protective cushion background (guarantees QR data modules behind logo do not bleed through)
+  const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  bg.setAttribute("x", (logoX - logoW * 0.08).toString());
+  bg.setAttribute("y", (logoY - logoH * 0.08).toString());
+  bg.setAttribute("width", (logoW * 1.16).toString());
+  bg.setAttribute("height", (logoH * 1.16).toString());
+  bg.setAttribute("fill", logoConfig.maskBg || "#ffffff");
+  if (logoConfig.mask === "circle") {
+    bg.setAttribute("rx", (logoW * 0.58).toString());
+    bg.setAttribute("ry", (logoH * 0.58).toString());
+  } else {
+    bg.setAttribute("rx", (logoW * 0.22).toString());
+    bg.setAttribute("ry", (logoH * 0.22).toString());
   }
+  group.appendChild(bg);
 
   const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
   img.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", logoConfig.url);
@@ -193,31 +192,29 @@ function compositeLogoOnCanvas(
   const logoX = cx - logoW / 2;
   const logoY = cy - logoH / 2;
 
-  // 1. Draw Mask Background
-  if (logoConfig.mask !== "none") {
-    ctx.save();
-    ctx.fillStyle = logoConfig.maskBg || "#ffffff";
-    const maskW = logoW * 1.12;
-    const maskH = logoH * 1.12;
-    const maskX = cx - maskW / 2;
-    const maskY = cy - maskH / 2;
+  // 1. Draw Protective Mask / Cushion Background
+  ctx.save();
+  ctx.fillStyle = logoConfig.maskBg || "#ffffff";
+  const maskW = logoW * 1.16;
+  const maskH = logoH * 1.16;
+  const maskX = cx - maskW / 2;
+  const maskY = cy - maskH / 2;
 
-    if (logoConfig.mask === "circle") {
-      ctx.beginPath();
-      ctx.arc(cx, cy, maskW / 2, 0, Math.PI * 2);
-      ctx.fill();
+  if (logoConfig.mask === "circle") {
+    ctx.beginPath();
+    ctx.arc(cx, cy, maskW / 2, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    const radius = maskW * 0.22;
+    ctx.beginPath();
+    if (typeof ctx.roundRect === "function") {
+      ctx.roundRect(maskX, maskY, maskW, maskH, radius);
     } else {
-      const radius = maskW * 0.22;
-      ctx.beginPath();
-      if (typeof ctx.roundRect === "function") {
-        ctx.roundRect(maskX, maskY, maskW, maskH, radius);
-      } else {
-        ctx.rect(maskX, maskY, maskW, maskH);
-      }
-      ctx.fill();
+      ctx.rect(maskX, maskY, maskW, maskH);
     }
-    ctx.restore();
+    ctx.fill();
   }
+  ctx.restore();
 
   // 2. Draw Logo with proper mask clipping & aspect ratio
   ctx.save();
