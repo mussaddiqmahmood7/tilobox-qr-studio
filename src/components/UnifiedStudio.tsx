@@ -26,11 +26,16 @@ interface UnifiedStudioProps {
 export function UnifiedStudio({ initialStyle }: UnifiedStudioProps) {
   const [activeStyle, setActiveStyle] = useAtom(activeStyleAtom);
 
+  const mountedRef = React.useRef(false);
+
   useEffect(() => {
-    if (initialStyle && initialStyle !== activeStyle) {
-      setActiveStyle(initialStyle);
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      if (initialStyle) {
+        setActiveStyle(initialStyle);
+      }
     }
-  }, [initialStyle, setActiveStyle, activeStyle]);
+  }, [initialStyle, setActiveStyle]);
 
   const tA1 = useTranslations("qrcodes.a1");
   const a1Config = useA1Params();

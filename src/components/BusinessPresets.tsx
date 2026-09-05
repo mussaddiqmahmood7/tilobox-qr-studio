@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -23,15 +24,14 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import {
-  Utensils,
-  Scissors,
-  Car,
+  Link2,
   Wifi,
+  PhoneCall,
   Contact2,
+  FileText,
   Sparkles,
   Info,
   Check,
-  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -41,117 +41,99 @@ export function BusinessPresets() {
   const [guidanceTip, setGuidanceTip] = useState<string | null>(null);
 
   // Modal States
-  const [restaurantModalOpen, setRestaurantModalOpen] = useState(false);
-  const [barberModalOpen, setBarberModalOpen] = useState(false);
+  const [urlModalOpen, setUrlModalOpen] = useState(false);
   const [wifiModalOpen, setWifiModalOpen] = useState(false);
-  const [taxiModalOpen, setTaxiModalOpen] = useState(false);
+  const [callModalOpen, setCallModalOpen] = useState(false);
   const [vcardModalOpen, setVcardModalOpen] = useState(false);
+  const [textModalOpen, setTextModalOpen] = useState(false);
 
-  // Restaurant form state
-  const [restaurantName, setRestaurantName] = useState("The Brass Bistro");
-  const [restaurantTable, setRestaurantTable] = useState("Table 12");
-  const [restaurantMenuUrl, setRestaurantMenuUrl] = useState("https://menu.tilobox.com/bistro");
-
-  // Barber form state
-  const [barberShop, setBarberShop] = useState("Crown Barber Studio");
-  const [barberStylist, setBarberStylist] = useState("Marcus & Stylists");
-  const [barberUrl, setBarberUrl] = useState("https://booking.tilobox.com/crown-barber");
+  // URL Form state (user's actual link)
+  const [customLinkUrl, setCustomLinkUrl] = useState("");
+  const [linkCategory, setLinkCategory] = useState("menu");
 
   // Wi-Fi form state
-  const [wifiSsid, setWifiSsid] = useState("TiloBox-Guest");
-  const [wifiPassword, setWifiPassword] = useState("StudioGuest2026");
+  const [wifiSsid, setWifiSsid] = useState("");
+  const [wifiPassword, setWifiPassword] = useState("");
   const [wifiEncryption, setWifiEncryption] = useState("WPA");
 
-  // Taxi form state
-  const [taxiPhone, setTaxiPhone] = useState("+15550192834");
-  const [taxiChannel, setTaxiChannel] = useState<"whatsapp" | "phone">("whatsapp");
-  const [taxiMessage, setTaxiMessage] = useState("Hello, I need a taxi ride from your pickup location.");
+  // WhatsApp / Call form state
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [callChannel, setCallChannel] = useState<"whatsapp" | "phone">("whatsapp");
+  const [whatsappMessage, setWhatsappMessage] = useState("Hello, I would like to inquire about your services.");
 
   // vCard form state
-  const [vcardName, setVcardName] = useState("Alex Morgan");
-  const [vcardOrg, setVcardOrg] = useState("TiloBox Studio");
-  const [vcardTitle, setVcardTitle] = useState("Director of Design");
-  const [vcardPhone, setVcardPhone] = useState("+1 (555) 234-5678");
-  const [vcardEmail, setVcardEmail] = useState("alex@tilobox.com");
-  const [vcardWebsite, setVcardWebsite] = useState("https://tilobox.com");
+  const [vcardName, setVcardName] = useState("");
+  const [vcardOrg, setVcardOrg] = useState("");
+  const [vcardTitle, setVcardTitle] = useState("");
+  const [vcardPhone, setVcardPhone] = useState("");
+  const [vcardEmail, setVcardEmail] = useState("");
+  const [vcardWebsite, setVcardWebsite] = useState("");
+
+  // Plain Text form state
+  const [plainTextContent, setPlainTextContent] = useState("");
 
   // Handlers
-  const handleApplyRestaurant = (e: React.FormEvent) => {
+  const handleApplyUrl = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!restaurantMenuUrl) {
-      toast.error("Menu URL is required");
+    if (!customLinkUrl.trim()) {
+      toast.error("Please enter a valid URL");
       return;
     }
-    const cleanUrl = restaurantMenuUrl.trim();
-    const finalUrl = restaurantTable
-      ? `${cleanUrl}${cleanUrl.includes("?") ? "&" : "?"}table=${encodeURIComponent(restaurantTable)}`
-      : cleanUrl;
-    setUrl(finalUrl);
-    setActivePreset("restaurant");
-    setGuidanceTip(
-      `🍽️ Restaurant Menu Active for "${restaurantName}" (${restaurantTable || "Main Menu"}): Pointing a phone camera opens your live digital menu instantly without physical paper menus. Use our Display Card Suite below to generate a tabletop display!`
-    );
-    setRestaurantModalOpen(false);
-    toast.success("Digital Menu preset configured");
-  };
-
-  const handleApplyBarber = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!barberUrl) {
-      toast.error("Booking URL is required");
-      return;
+    let formatted = customLinkUrl.trim();
+    if (!formatted.startsWith("http://") && !formatted.startsWith("https://")) {
+      formatted = `https://${formatted}`;
     }
-    setUrl(barberUrl.trim());
-    setActivePreset("barber");
+    setUrl(formatted);
+    setActivePreset("url");
     setGuidanceTip(
-      `💇 Barber & Salon Active for "${barberShop}": Pointing a phone camera opens direct appointment scheduling for ${barberStylist}. Place on mirror stickers, workstation blocks, or checkout cards.`
+      `🔗 Web Link Active: Scanning this QR code opens "${formatted}" directly in the smartphone browser. Ideal for digital restaurant menus, booking calendars, portfolios, and social profiles.`
     );
-    setBarberModalOpen(false);
-    toast.success("Barber booking preset configured");
+    setUrlModalOpen(false);
+    toast.success("Target URL applied to QR code");
   };
 
   const handleApplyWifi = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!wifiSsid) {
-      toast.error("Network SSID is required");
+    if (!wifiSsid.trim()) {
+      toast.error("Network Name (SSID) is required");
       return;
     }
     const enc = wifiEncryption === "nopass" ? "nopass" : wifiEncryption;
-    const formatted = `WIFI:T:${enc};S:${wifiSsid};P:${wifiPassword};;`;
+    const formatted = `WIFI:T:${enc};S:${wifiSsid.trim()};P:${wifiPassword};;`;
     setUrl(formatted);
     setActivePreset("wifi");
     setGuidanceTip(
-      `📶 Wi-Fi Card Active: Pointing phone camera at this QR code prompts instant connection to "${wifiSsid}" without typing passwords. Place on table tent cards!`
+      `📶 Wi-Fi Auto-Connect Active: Pointing any smartphone camera at this QR code prompts instant connection to "${wifiSsid}" without typing passwords. Place on table tent cards or reception desks!`
     );
     setWifiModalOpen(false);
-    toast.success("Guest Wi-Fi connection QR configured");
+    toast.success("Wi-Fi connection code generated");
   };
 
-  const handleApplyTaxi = (e: React.FormEvent) => {
+  const handleApplyCall = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!taxiPhone) {
+    if (!phoneNumber.trim()) {
       toast.error("Phone number is required");
       return;
     }
-    const cleanNumber = taxiPhone.replace(/[^0-9]/g, "");
+    const cleanNumber = phoneNumber.replace(/[^0-9]/g, "");
     let formatted = "";
-    if (taxiChannel === "whatsapp") {
-      formatted = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(taxiMessage)}`;
+    if (callChannel === "whatsapp") {
+      formatted = `https://wa.me/${cleanNumber}${whatsappMessage ? `?text=${encodeURIComponent(whatsappMessage)}` : ""}`;
     } else {
-      formatted = `tel:${taxiPhone}`;
+      formatted = `tel:${phoneNumber.trim()}`;
     }
     setUrl(formatted);
-    setActivePreset("taxi");
+    setActivePreset("call");
     setGuidanceTip(
-      "🚖 Fleet / Taxi Dispatch Active: One-tap dispatch link formatted for hotel lobbies, taxi counters, and driver cards."
+      `💬 ${callChannel === "whatsapp" ? "WhatsApp Chat" : "Direct Phone Call"} Active: Scanning prompts a 1-tap message or call to ${phoneNumber}. Great for customer support, taxi booking, and appointments.`
     );
-    setTaxiModalOpen(false);
-    toast.success("Taxi dispatch action link configured");
+    setCallModalOpen(false);
+    toast.success("Direct contact action link applied");
   };
 
   const handleApplyVCard = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!vcardName) {
+    if (!vcardName.trim()) {
       toast.error("Name is required");
       return;
     }
@@ -163,12 +145,12 @@ export function BusinessPresets() {
       "BEGIN:VCARD",
       "VERSION:3.0",
       `N:${lastName};${firstName};;;`,
-      `FN:${vcardName}`,
-      vcardOrg ? `ORG:${vcardOrg}` : "",
-      vcardTitle ? `TITLE:${vcardTitle}` : "",
-      vcardPhone ? `TEL;TYPE=CELL:${vcardPhone}` : "",
-      vcardEmail ? `EMAIL:${vcardEmail}` : "",
-      vcardWebsite ? `URL:${vcardWebsite}` : "",
+      `FN:${vcardName.trim()}`,
+      vcardOrg.trim() ? `ORG:${vcardOrg.trim()}` : "",
+      vcardTitle.trim() ? `TITLE:${vcardTitle.trim()}` : "",
+      vcardPhone.trim() ? `TEL;TYPE=CELL:${vcardPhone.trim()}` : "",
+      vcardEmail.trim() ? `EMAIL:${vcardEmail.trim()}` : "",
+      vcardWebsite.trim() ? `URL:${vcardWebsite.trim()}` : "",
       "END:VCARD",
     ]
       .filter(Boolean)
@@ -177,10 +159,25 @@ export function BusinessPresets() {
     setUrl(vcard);
     setActivePreset("vcard");
     setGuidanceTip(
-      "💼 vCard Contact Card Active: Scanning this QR prompts users to instantly save contact details into their phone address book with zero manual typing."
+      `📇 vCard Contact Active: Scanning prompts phones to save ${vcardName.trim()}'s profile directly into their address book with zero manual typing.`
     );
     setVcardModalOpen(false);
-    toast.success("vCard digital contact code generated");
+    toast.success("vCard contact code generated");
+  };
+
+  const handleApplyText = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!plainTextContent.trim()) {
+      toast.error("Please enter some text");
+      return;
+    }
+    setUrl(plainTextContent.trim());
+    setActivePreset("text");
+    setGuidanceTip(
+      `📝 Plain Text Active: Scanning displays your raw text, table number, or note on the user's phone screen.`
+    );
+    setTextModalOpen(false);
+    toast.success("Plain text applied to QR code");
   };
 
   return (
@@ -190,10 +187,10 @@ export function BusinessPresets() {
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-primary" />
-              Quick Business Presets
+              Quick QR Data Formatters
             </span>
             <span className="hidden sm:inline text-[11px] text-muted-foreground/70">
-              • Ready-to-use business templates with auto-formatting
+              • Formats standard QR protocols for real-world scanning
             </span>
           </div>
           {activePreset && (
@@ -205,73 +202,34 @@ export function BusinessPresets() {
               }}
               className="text-[11px] text-muted-foreground hover:text-foreground underline underline-offset-2"
             >
-              Clear Preset
+              Clear Formatter
             </button>
           )}
         </div>
 
+        {/* 5 Real QR Formatters */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-          {/* 1. Restaurant */}
+          {/* 1. Website / URL */}
           <button
             type="button"
-            onClick={() => setRestaurantModalOpen(true)}
+            onClick={() => setUrlModalOpen(true)}
             className={cn(
               "flex flex-col items-start p-2.5 rounded-xl border text-start transition-all",
-              activePreset === "restaurant"
+              activePreset === "url"
                 ? "border-primary bg-primary/10 text-primary shadow-xs ring-1 ring-primary/30"
                 : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:bg-card hover:text-foreground"
             )}
           >
             <div className="flex items-center gap-1.5 w-full">
-              <Utensils className="w-4 h-4 shrink-0 text-amber-500" />
-              <span className="font-semibold text-xs text-foreground truncate">Digital Menu</span>
+              <Link2 className="w-4 h-4 shrink-0 text-sky-500" />
+              <span className="font-semibold text-xs text-foreground truncate">Website Link</span>
             </div>
             <span className="text-[10px] text-muted-foreground mt-0.5 truncate w-full">
-              Table & PDF link
+              Menu, Booking, Web
             </span>
           </button>
 
-          {/* 2. Barber */}
-          <button
-            type="button"
-            onClick={() => setBarberModalOpen(true)}
-            className={cn(
-              "flex flex-col items-start p-2.5 rounded-xl border text-start transition-all",
-              activePreset === "barber"
-                ? "border-primary bg-primary/10 text-primary shadow-xs ring-1 ring-primary/30"
-                : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:bg-card hover:text-foreground"
-            )}
-          >
-            <div className="flex items-center gap-1.5 w-full">
-              <Scissors className="w-4 h-4 shrink-0 text-indigo-500" />
-              <span className="font-semibold text-xs text-foreground truncate">Barber Booking</span>
-            </div>
-            <span className="text-[10px] text-muted-foreground mt-0.5 truncate w-full">
-              Appointments
-            </span>
-          </button>
-
-          {/* 3. Taxi */}
-          <button
-            type="button"
-            onClick={() => setTaxiModalOpen(true)}
-            className={cn(
-              "flex flex-col items-start p-2.5 rounded-xl border text-start transition-all",
-              activePreset === "taxi"
-                ? "border-primary bg-primary/10 text-primary shadow-xs ring-1 ring-primary/30"
-                : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:bg-card hover:text-foreground"
-            )}
-          >
-            <div className="flex items-center gap-1.5 w-full">
-              <Car className="w-4 h-4 shrink-0 text-emerald-500" />
-              <span className="font-semibold text-xs text-foreground truncate">Taxi Dispatch</span>
-            </div>
-            <span className="text-[10px] text-muted-foreground mt-0.5 truncate w-full">
-              WhatsApp & Call
-            </span>
-          </button>
-
-          {/* 4. Guest Wi-Fi */}
+          {/* 2. Wi-Fi Auto-Connect */}
           <button
             type="button"
             onClick={() => setWifiModalOpen(true)}
@@ -283,20 +241,40 @@ export function BusinessPresets() {
             )}
           >
             <div className="flex items-center gap-1.5 w-full">
-              <Wifi className="w-4 h-4 shrink-0 text-sky-500" />
+              <Wifi className="w-4 h-4 shrink-0 text-emerald-500" />
               <span className="font-semibold text-xs text-foreground truncate">Guest Wi-Fi</span>
             </div>
             <span className="text-[10px] text-muted-foreground mt-0.5 truncate w-full">
-              1-Tap Auto Connect
+              Auto-Join Network
             </span>
           </button>
 
-          {/* 5. vCard */}
+          {/* 3. WhatsApp / Call */}
+          <button
+            type="button"
+            onClick={() => setCallModalOpen(true)}
+            className={cn(
+              "flex flex-col items-start p-2.5 rounded-xl border text-start transition-all",
+              activePreset === "call"
+                ? "border-primary bg-primary/10 text-primary shadow-xs ring-1 ring-primary/30"
+                : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:bg-card hover:text-foreground"
+            )}
+          >
+            <div className="flex items-center gap-1.5 w-full">
+              <PhoneCall className="w-4 h-4 shrink-0 text-amber-500" />
+              <span className="font-semibold text-xs text-foreground truncate">WhatsApp & Call</span>
+            </div>
+            <span className="text-[10px] text-muted-foreground mt-0.5 truncate w-full">
+              1-Tap Contact Action
+            </span>
+          </button>
+
+          {/* 4. vCard Contact */}
           <button
             type="button"
             onClick={() => setVcardModalOpen(true)}
             className={cn(
-              "col-span-2 sm:col-span-1 flex flex-col items-start p-2.5 rounded-xl border text-start transition-all",
+              "flex flex-col items-start p-2.5 rounded-xl border text-start transition-all",
               activePreset === "vcard"
                 ? "border-primary bg-primary/10 text-primary shadow-xs ring-1 ring-primary/30"
                 : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:bg-card hover:text-foreground"
@@ -307,12 +285,32 @@ export function BusinessPresets() {
               <span className="font-semibold text-xs text-foreground truncate">vCard Profile</span>
             </div>
             <span className="text-[10px] text-muted-foreground mt-0.5 truncate w-full">
-              Save to Contacts
+              Save to Address Book
+            </span>
+          </button>
+
+          {/* 5. Plain Text / Notes */}
+          <button
+            type="button"
+            onClick={() => setTextModalOpen(true)}
+            className={cn(
+              "col-span-2 sm:col-span-1 flex flex-col items-start p-2.5 rounded-xl border text-start transition-all",
+              activePreset === "text"
+                ? "border-primary bg-primary/10 text-primary shadow-xs ring-1 ring-primary/30"
+                : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:bg-card hover:text-foreground"
+            )}
+          >
+            <div className="flex items-center gap-1.5 w-full">
+              <FileText className="w-4 h-4 shrink-0 text-indigo-500" />
+              <span className="font-semibold text-xs text-foreground truncate">Plain Text</span>
+            </div>
+            <span className="text-[10px] text-muted-foreground mt-0.5 truncate w-full">
+              Notes, Codes, Tables
             </span>
           </button>
         </div>
 
-        {/* Guidance tip box */}
+        {/* Real-time Guidance Tip */}
         {guidanceTip && (
           <div className="mt-2 flex items-start gap-2 rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-foreground/90 animate-in fade-in-50 duration-200">
             <Info className="w-4 h-4 shrink-0 text-primary mt-0.5" />
@@ -321,52 +319,53 @@ export function BusinessPresets() {
         )}
       </div>
 
-      {/* Digital Menu Modal */}
-      <Dialog open={restaurantModalOpen} onOpenChange={setRestaurantModalOpen}>
+      {/* 1. Website Link Modal */}
+      <Dialog open={urlModalOpen} onOpenChange={setUrlModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Utensils className="w-5 h-5 text-amber-500" />
-              Configure Restaurant Digital Menu QR
+              <Link2 className="w-5 h-5 text-sky-500" />
+              Encode Website or Online Link
             </DialogTitle>
             <DialogDescription>
-              Guests scan this QR code on their table to browse your contactless food and drink menu on their phone.
+              Enter the actual link you want people to visit when they scan this QR code with their phone camera.
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleApplyRestaurant} className="space-y-4 py-2">
+          <form onSubmit={handleApplyUrl} className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label htmlFor="rest-name">Restaurant / Cafe Name</Label>
-              <Input
-                id="rest-name"
-                value={restaurantName}
-                onChange={(e) => setRestaurantName(e.target.value)}
-                placeholder="e.g. The Brass Bistro"
-                required
-              />
+              <Label htmlFor="link-type">Link Type / Purpose</Label>
+              <Select value={linkCategory} onValueChange={setLinkCategory}>
+                <SelectTrigger id="link-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="menu">Restaurant or Cafe Digital Menu</SelectItem>
+                  <SelectItem value="booking">Barber, Salon, or Appointment Link</SelectItem>
+                  <SelectItem value="social">Social Profile (Instagram, TikTok, LinkedIn)</SelectItem>
+                  <SelectItem value="business">Company Website or Portfolio</SelectItem>
+                  <SelectItem value="file">PDF Document or Cloud File</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="rest-url">Digital Menu or Website URL</Label>
+              <Label htmlFor="target-link">Target URL Address</Label>
               <Input
-                id="rest-url"
-                value={restaurantMenuUrl}
-                onChange={(e) => setRestaurantMenuUrl(e.target.value)}
-                placeholder="https://menu.yourrestaurant.com"
+                id="target-link"
+                value={customLinkUrl}
+                onChange={(e) => setCustomLinkUrl(e.target.value)}
+                placeholder={
+                  linkCategory === "menu"
+                    ? "https://yourrestaurant.com/menu"
+                    : linkCategory === "booking"
+                    ? "https://calendly.com/your-name"
+                    : "https://yourdomain.com"
+                }
                 required
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="rest-table">Table / Station Identification (Optional)</Label>
-              <Input
-                id="rest-table"
-                value={restaurantTable}
-                onChange={(e) => setRestaurantTable(e.target.value)}
-                placeholder="e.g. Table 12, Booth 4, Patio 2"
               />
               <p className="text-[11px] text-muted-foreground">
-                Appends ?table=12 to URL so orders and table requests are instantly identified.
+                Paste any live web link. Smartphones will open this link directly in Safari or Chrome.
               </p>
             </div>
 
@@ -374,90 +373,28 @@ export function BusinessPresets() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setRestaurantModalOpen(false)}
+                onClick={() => setUrlModalOpen(false)}
               >
                 Cancel
               </Button>
               <Button type="submit" className="gap-1.5">
-                <Check className="w-4 h-4" /> Apply Menu Preset
+                <Check className="w-4 h-4" /> Apply URL
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Barber & Salon Booking Modal */}
-      <Dialog open={barberModalOpen} onOpenChange={setBarberModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Scissors className="w-5 h-5 text-indigo-500" />
-              Configure Barber & Salon Booking QR
-            </DialogTitle>
-            <DialogDescription>
-              Display this on mirror stickers and counter cards so clients can schedule their next appointment in 3 seconds.
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleApplyBarber} className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="barber-shop">Shop / Salon Name</Label>
-              <Input
-                id="barber-shop"
-                value={barberShop}
-                onChange={(e) => setBarberShop(e.target.value)}
-                placeholder="e.g. Crown Barber Studio"
-                required
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="barber-stylist">Stylist / Team Name</Label>
-              <Input
-                id="barber-stylist"
-                value={barberStylist}
-                onChange={(e) => setBarberStylist(e.target.value)}
-                placeholder="e.g. Marcus & Team"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="barber-url">Booking URL (Calendly, Fresha, Square, Instagram)</Label>
-              <Input
-                id="barber-url"
-                value={barberUrl}
-                onChange={(e) => setBarberUrl(e.target.value)}
-                placeholder="https://booking.yoursalon.com"
-                required
-              />
-            </div>
-
-            <DialogFooter className="pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setBarberModalOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" className="gap-1.5">
-                <Check className="w-4 h-4" /> Apply Booking Preset
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Guest Wi-Fi Modal */}
+      {/* 2. Guest Wi-Fi Modal */}
       <Dialog open={wifiModalOpen} onOpenChange={setWifiModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Wifi className="w-5 h-5 text-sky-500" />
-              Configure Guest Wi-Fi QR Card
+              <Wifi className="w-5 h-5 text-emerald-500" />
+              Configure Guest Wi-Fi Auto-Connect
             </DialogTitle>
             <DialogDescription>
-              Guests scan this code with their smartphone camera to connect to your Wi-Fi automatically without typing passwords.
+              When guests scan this QR code, their phone displays a popup: &ldquo;Join network [Name]?&rdquo; and connects with zero typing.
             </DialogDescription>
           </DialogHeader>
 
@@ -468,19 +405,19 @@ export function BusinessPresets() {
                 id="wifi-ssid"
                 value={wifiSsid}
                 onChange={(e) => setWifiSsid(e.target.value)}
-                placeholder="e.g. MyCafe-Guest-WiFi"
+                placeholder="e.g. MyCafe_Guest"
                 required
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="wifi-pass">Password</Label>
+              <Label htmlFor="wifi-pass">Wi-Fi Password</Label>
               <Input
                 id="wifi-pass"
                 type="text"
                 value={wifiPassword}
                 onChange={(e) => setWifiPassword(e.target.value)}
-                placeholder="Leave blank if open network"
+                placeholder="Leave blank if open network without password"
               />
             </div>
 
@@ -491,7 +428,7 @@ export function BusinessPresets() {
                   <SelectValue placeholder="Encryption" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="WPA">WPA / WPA2 / WPA3 (Standard)</SelectItem>
+                  <SelectItem value="WPA">WPA / WPA2 / WPA3 (Standard for most routers)</SelectItem>
                   <SelectItem value="WEP">WEP (Legacy)</SelectItem>
                   <SelectItem value="nopass">None (Open Network)</SelectItem>
                 </SelectContent>
@@ -514,55 +451,55 @@ export function BusinessPresets() {
         </DialogContent>
       </Dialog>
 
-      {/* Taxi / Dispatch Modal */}
-      <Dialog open={taxiModalOpen} onOpenChange={setTaxiModalOpen}>
+      {/* 3. WhatsApp / Call Modal */}
+      <Dialog open={callModalOpen} onOpenChange={setCallModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Car className="w-5 h-5 text-emerald-500" />
-              Taxi & Fleet Dispatch Quick-Link
+              <PhoneCall className="w-5 h-5 text-amber-500" />
+              WhatsApp & Phone Contact Action
             </DialogTitle>
             <DialogDescription>
-              Format a direct WhatsApp chat or phone call action for tourists, guests, and hotel lobby pickup stands.
+              Let customers, passengers, or clients initiate a direct WhatsApp chat or phone call with 1 tap.
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleApplyTaxi} className="space-y-4 py-2">
+          <form onSubmit={handleApplyCall} className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label htmlFor="taxi-channel">Dispatch Channel</Label>
+              <Label htmlFor="call-channel">Action Channel</Label>
               <Select
-                value={taxiChannel}
-                onValueChange={(val: "whatsapp" | "phone") => setTaxiChannel(val)}
+                value={callChannel}
+                onValueChange={(val: "whatsapp" | "phone") => setCallChannel(val)}
               >
-                <SelectTrigger id="taxi-channel">
+                <SelectTrigger id="call-channel">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="whatsapp">WhatsApp Direct Chat</SelectItem>
+                  <SelectItem value="whatsapp">WhatsApp Direct Chat (wa.me)</SelectItem>
                   <SelectItem value="phone">Direct Phone Call (tel:)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="taxi-phone">Driver / Dispatch Phone Number</Label>
+              <Label htmlFor="call-phone">Phone Number (include Country Code)</Label>
               <Input
-                id="taxi-phone"
-                value={taxiPhone}
-                onChange={(e) => setTaxiPhone(e.target.value)}
-                placeholder="+1 555 019 2834 (include country code)"
+                id="call-phone"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="+1 555 234 5678"
                 required
               />
             </div>
 
-            {taxiChannel === "whatsapp" && (
+            {callChannel === "whatsapp" && (
               <div className="space-y-1.5">
-                <Label htmlFor="taxi-msg">Default Chat Message</Label>
+                <Label htmlFor="call-msg">Default Pre-filled Message</Label>
                 <Input
-                  id="taxi-msg"
-                  value={taxiMessage}
-                  onChange={(e) => setTaxiMessage(e.target.value)}
-                  placeholder="e.g. Hello, I need a taxi from reception."
+                  id="call-msg"
+                  value={whatsappMessage}
+                  onChange={(e) => setWhatsappMessage(e.target.value)}
+                  placeholder="e.g. Hello, I would like to book a ride / make a reservation."
                 />
               </div>
             )}
@@ -571,19 +508,19 @@ export function BusinessPresets() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setTaxiModalOpen(false)}
+                onClick={() => setCallModalOpen(false)}
               >
                 Cancel
               </Button>
               <Button type="submit" className="gap-1.5">
-                <Check className="w-4 h-4" /> Apply Dispatch Link
+                <Check className="w-4 h-4" /> Apply Contact Action
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* vCard Digital Business Card Modal */}
+      {/* 4. vCard Digital Contact Card Modal */}
       <Dialog open={vcardModalOpen} onOpenChange={setVcardModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -592,7 +529,7 @@ export function BusinessPresets() {
               vCard Digital Contact Card
             </DialogTitle>
             <DialogDescription>
-              Generates standard vCard 3.0. Scanning prompts smartphone users to save your profile into contacts instantly.
+              Encodes standard vCard 3.0. When scanned, smartphones prompt users to add your contact directly to their phonebook.
             </DialogDescription>
           </DialogHeader>
 
@@ -603,7 +540,7 @@ export function BusinessPresets() {
                 id="vcard-name"
                 value={vcardName}
                 onChange={(e) => setVcardName(e.target.value)}
-                placeholder="Alex Morgan"
+                placeholder="e.g. Jane Doe"
                 required
               />
             </div>
@@ -615,7 +552,7 @@ export function BusinessPresets() {
                   id="vcard-org"
                   value={vcardOrg}
                   onChange={(e) => setVcardOrg(e.target.value)}
-                  placeholder="TiloBox Studio"
+                  placeholder="e.g. Studio Acme"
                 />
               </div>
               <div className="space-y-1">
@@ -624,7 +561,7 @@ export function BusinessPresets() {
                   id="vcard-title"
                   value={vcardTitle}
                   onChange={(e) => setVcardTitle(e.target.value)}
-                  placeholder="Creative Lead"
+                  placeholder="e.g. Creative Lead"
                 />
               </div>
             </div>
@@ -646,18 +583,18 @@ export function BusinessPresets() {
                   type="email"
                   value={vcardEmail}
                   onChange={(e) => setVcardEmail(e.target.value)}
-                  placeholder="alex@tilobox.com"
+                  placeholder="jane@example.com"
                 />
               </div>
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="vcard-web">Website / Portfolio</Label>
+              <Label htmlFor="vcard-web">Website URL</Label>
               <Input
                 id="vcard-web"
                 value={vcardWebsite}
                 onChange={(e) => setVcardWebsite(e.target.value)}
-                placeholder="https://tilobox.com"
+                placeholder="https://example.com"
               />
             </div>
 
@@ -671,6 +608,48 @@ export function BusinessPresets() {
               </Button>
               <Button type="submit" className="gap-1.5">
                 <Check className="w-4 h-4" /> Apply Contact Card
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* 5. Plain Text Modal */}
+      <Dialog open={textModalOpen} onOpenChange={setTextModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-indigo-500" />
+              Encode Plain Text or Table Identifier
+            </DialogTitle>
+            <DialogDescription>
+              Encode any raw text, table number, discount coupon code, or instructions directly into the QR code.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleApplyText} className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="plain-text">Content / Text</Label>
+              <Textarea
+                id="plain-text"
+                rows={4}
+                value={plainTextContent}
+                onChange={(e) => setPlainTextContent(e.target.value)}
+                placeholder="e.g. Table 12 • Special Promo Code: TILOBOX20"
+                required
+              />
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setTextModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" className="gap-1.5">
+                <Check className="w-4 h-4" /> Apply Text
               </Button>
             </DialogFooter>
           </form>
