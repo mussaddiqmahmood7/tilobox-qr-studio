@@ -266,42 +266,40 @@ export function QrContentPanel() {
   ]);
 
   return (
-    <div className="w-full bg-card/70 border border-border/80 rounded-2xl p-4 sm:p-5 shadow-xs backdrop-blur-xs">
+    <div className="w-full bg-card/60 border border-border/80 rounded-xl p-3 sm:p-4 shadow-2xs backdrop-blur-xs">
       {/* Top Header: Content Category Tabs & Scan Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/60">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
-              QR Content Type
-            </span>
-            {/* Live Real-Time Validation Pill */}
-            <div
-              className={cn(
-                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium transition-colors",
-                validationStatus.isValid
-                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                  : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
-              )}
-            >
-              {validationStatus.isValid ? (
-                <CheckCircle2 className="w-3 h-3" />
-              ) : (
-                <AlertCircle className="w-3 h-3" />
-              )}
-              <span>{validationStatus.message}</span>
-            </div>
+      <div className="flex items-center justify-between gap-2 pb-2 border-b border-border/60">
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-primary" />
+            Content
+          </span>
+          {/* Live Real-Time Validation Pill */}
+          <div
+            className={cn(
+              "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors",
+              validationStatus.isValid
+                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+            )}
+          >
+            {validationStatus.isValid ? (
+              <CheckCircle2 className="w-2.5 h-2.5" />
+            ) : (
+              <AlertCircle className="w-2.5 h-2.5" />
+            )}
+            <span>{validationStatus.message}</span>
           </div>
         </div>
 
         {/* Scan Existing QR Code Button */}
-        <div className="flex items-center gap-2 shrink-0">
-          <ScanButton name="Scan QR Image" />
+        <div className="flex items-center gap-1.5 shrink-0">
+          <ScanButton name="Scan QR" />
         </div>
       </div>
 
-      {/* Category Pills Switcher */}
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 py-3">
+      {/* Category Pills Switcher: Sleek, Horizontal, Space-Efficient */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 py-2">
         {CATEGORIES.map((cat) => {
           const Icon = cat.icon;
           const isActive = activeCategory === cat.id;
@@ -311,19 +309,19 @@ export function QrContentPanel() {
               type="button"
               onClick={() => setActiveCategory(cat.id)}
               className={cn(
-                "flex flex-col items-center justify-center p-2 rounded-xl border text-center transition-all group",
+                "flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg border text-center transition-all group select-none",
                 isActive
-                  ? "bg-primary text-primary-foreground border-primary shadow-xs font-semibold ring-2 ring-primary/20"
-                  : "bg-card/60 text-muted-foreground border-border/70 hover:bg-accent/40 hover:text-foreground"
+                  ? "bg-primary text-primary-foreground border-primary shadow-2xs font-semibold ring-1 ring-primary/30"
+                  : "bg-card/70 text-muted-foreground border-border/70 hover:bg-accent/40 hover:text-foreground"
               )}
             >
               <Icon
                 className={cn(
-                  "w-4 h-4 mb-1 transition-transform group-hover:scale-110",
+                  "w-3.5 h-3.5 shrink-0 transition-transform group-hover:scale-105",
                   isActive ? "text-primary-foreground" : "text-primary"
                 )}
               />
-              <span className="text-[11px] leading-tight truncate w-full">
+              <span className="text-xs truncate font-medium">
                 {cat.label}
               </span>
             </button>
@@ -332,43 +330,38 @@ export function QrContentPanel() {
       </div>
 
       {/* Stable Form Container with Smooth Transitions (Zero layout jumping) */}
-      <div className="pt-2 min-h-[160px] flex flex-col justify-center">
+      <div className="pt-1.5 min-h-[105px] flex flex-col justify-center">
         <AnimatePresence mode="wait">
           {/* 1. WEBSITE URL */}
           {activeCategory === "url" && (
             <motion.div
               key="cat-url"
-              initial={{ opacity: 0, y: 4 }}
+              initial={{ opacity: 0, y: 3 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
-              className="space-y-3"
+              exit={{ opacity: 0, y: -3 }}
+              transition={{ duration: 0.12 }}
+              className="space-y-1.5"
             >
-              <div className="space-y-1.5">
-                <Label htmlFor="input-url" className="text-xs font-semibold text-foreground">
-                  Website or Destination URL
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="input-url"
-                    value={rawUrl}
-                    onChange={(e) => setRawUrl(e.target.value)}
-                    placeholder="https://example.com"
-                    className="font-mono text-sm bg-background border-border/80 focus-visible:ring-primary pl-3 pr-24"
-                  />
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setRawUrl("https://tilobox.com")}
-                      className="text-[10px] bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground px-2 py-1 rounded-md transition-colors"
-                    >
-                      Default
-                    </button>
-                  </div>
+              <div className="relative">
+                <Input
+                  id="input-url"
+                  value={rawUrl}
+                  onChange={(e) => setRawUrl(e.target.value)}
+                  placeholder="https://example.com"
+                  className="h-8 font-mono text-xs bg-background border-border/80 focus-visible:ring-primary pl-2.5 pr-20"
+                />
+                <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setRawUrl("https://tilobox.com")}
+                    className="text-[10px] bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded transition-colors"
+                  >
+                    Default
+                  </button>
                 </div>
               </div>
-              <p className="text-[11px] text-muted-foreground">
-                Paste any web page, menu, social media, booking page, or cloud PDF link.
+              <p className="text-[10px] text-muted-foreground">
+                Paste any destination URL, digital menu, portfolio, social media, or cloud PDF file.
               </p>
             </motion.div>
           )}
@@ -377,39 +370,39 @@ export function QrContentPanel() {
           {activeCategory === "whatsapp" && (
             <motion.div
               key="cat-whatsapp"
-              initial={{ opacity: 0, y: 4 }}
+              initial={{ opacity: 0, y: 3 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
-              className="space-y-3"
+              exit={{ opacity: 0, y: -3 }}
+              transition={{ duration: 0.12 }}
+              className="space-y-1.5"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="input-wa-phone" className="text-xs font-semibold text-foreground">
-                    WhatsApp Phone Number (with Country Code)
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <Label htmlFor="input-wa-phone" className="text-[11px] font-medium text-foreground">
+                    WhatsApp Number (with Country Code)
                   </Label>
                   <Input
                     id="input-wa-phone"
                     value={waPhone}
                     onChange={(e) => setWaPhone(e.target.value)}
                     placeholder="+1 555 234 5678"
-                    className="font-mono text-sm bg-background border-border/80 focus-visible:ring-primary"
+                    className="h-8 font-mono text-xs bg-background border-border/80 focus-visible:ring-primary"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="input-wa-msg" className="text-xs font-semibold text-foreground">
-                    Default Pre-filled Chat Message (Optional)
+                <div className="space-y-1">
+                  <Label htmlFor="input-wa-msg" className="text-[11px] font-medium text-foreground">
+                    Prefilled Chat Message (Optional)
                   </Label>
                   <Input
                     id="input-wa-msg"
                     value={waMessage}
                     onChange={(e) => setWaMessage(e.target.value)}
                     placeholder="e.g. Hello, I'd like to book / inquire..."
-                    className="text-sm bg-background border-border/80 focus-visible:ring-primary"
+                    className="h-8 text-xs bg-background border-border/80 focus-visible:ring-primary"
                   />
                 </div>
               </div>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-[10px] text-muted-foreground">
                 When scanned, opens WhatsApp chat directly with your phone number and message prefilled.
               </p>
             </motion.div>
@@ -419,14 +412,14 @@ export function QrContentPanel() {
           {activeCategory === "phone" && (
             <motion.div
               key="cat-phone"
-              initial={{ opacity: 0, y: 4 }}
+              initial={{ opacity: 0, y: 3 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
-              className="space-y-3"
+              exit={{ opacity: 0, y: -3 }}
+              transition={{ duration: 0.12 }}
+              className="space-y-1.5"
             >
-              <div className="space-y-1.5">
-                <Label htmlFor="input-phone" className="text-xs font-semibold text-foreground">
+              <div className="space-y-1">
+                <Label htmlFor="input-phone" className="text-[11px] font-medium text-foreground">
                   Phone / Hotline Number
                 </Label>
                 <div className="relative">
@@ -435,11 +428,11 @@ export function QrContentPanel() {
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     placeholder="+1 555 234 5678"
-                    className="font-mono text-sm bg-background border-border/80 focus-visible:ring-primary"
+                    className="h-8 font-mono text-xs bg-background border-border/80 focus-visible:ring-primary"
                   />
                 </div>
               </div>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-[10px] text-muted-foreground">
                 Smartphone camera scan will immediately prompt to dial:{" "}
                 <span className="font-mono font-medium text-foreground">
                   {phoneNumber || "+1 555 234 5678"}
@@ -452,15 +445,15 @@ export function QrContentPanel() {
           {activeCategory === "wifi" && (
             <motion.div
               key="cat-wifi"
-              initial={{ opacity: 0, y: 4 }}
+              initial={{ opacity: 0, y: 3 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
-              className="space-y-3"
+              exit={{ opacity: 0, y: -3 }}
+              transition={{ duration: 0.12 }}
+              className="space-y-1.5"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="input-wifi-ssid" className="text-xs font-semibold text-foreground">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="space-y-1">
+                  <Label htmlFor="input-wifi-ssid" className="text-[11px] font-medium text-foreground">
                     Network Name (SSID)
                   </Label>
                   <Input
@@ -468,12 +461,12 @@ export function QrContentPanel() {
                     value={wifiSsid}
                     onChange={(e) => setWifiSsid(e.target.value)}
                     placeholder="Guest-WiFi"
-                    className="text-sm bg-background border-border/80 focus-visible:ring-primary"
+                    className="h-8 text-xs bg-background border-border/80 focus-visible:ring-primary"
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="input-wifi-pass" className="text-xs font-semibold text-foreground">
+                <div className="space-y-1">
+                  <Label htmlFor="input-wifi-pass" className="text-[11px] font-medium text-foreground">
                     Password
                   </Label>
                   <div className="relative">
@@ -483,12 +476,12 @@ export function QrContentPanel() {
                       value={wifiPassword}
                       onChange={(e) => setWifiPassword(e.target.value)}
                       placeholder="Security key"
-                      className="font-mono text-sm bg-background border-border/80 focus-visible:ring-primary pr-9"
+                      className="h-8 font-mono text-xs bg-background border-border/80 focus-visible:ring-primary pr-8"
                     />
                     <button
                       type="button"
                       onClick={() => setShowWifiPassword(!showWifiPassword)}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     >
                       {showWifiPassword ? (
                         <EyeOff className="w-3.5 h-3.5" />
@@ -499,8 +492,8 @@ export function QrContentPanel() {
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="input-wifi-sec" className="text-xs font-semibold text-foreground">
+                <div className="space-y-1">
+                  <Label htmlFor="input-wifi-sec" className="text-[11px] font-medium text-foreground">
                     Security Type
                   </Label>
                   <Select
@@ -509,7 +502,7 @@ export function QrContentPanel() {
                       setWifiEncryption(val)
                     }
                   >
-                    <SelectTrigger id="input-wifi-sec" className="bg-background text-sm">
+                    <SelectTrigger id="input-wifi-sec" className="h-8 bg-background text-xs">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -521,17 +514,17 @@ export function QrContentPanel() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <input
                   type="checkbox"
                   id="wifi-hidden"
                   checked={wifiHidden}
                   onChange={(e) => setWifiHidden(e.target.checked)}
-                  className="rounded border-border text-primary focus:ring-primary h-3.5 w-3.5 cursor-pointer"
+                  className="rounded border-border text-primary focus:ring-primary h-3 w-3 cursor-pointer"
                 />
                 <label
                   htmlFor="wifi-hidden"
-                  className="text-xs text-muted-foreground cursor-pointer select-none"
+                  className="text-[10px] text-muted-foreground cursor-pointer select-none"
                 >
                   Hidden Network (SSID broadcast is disabled)
                 </label>
@@ -543,15 +536,15 @@ export function QrContentPanel() {
           {activeCategory === "vcard" && (
             <motion.div
               key="cat-vcard"
-              initial={{ opacity: 0, y: 4 }}
+              initial={{ opacity: 0, y: 3 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
-              className="space-y-3"
+              exit={{ opacity: 0, y: -3 }}
+              transition={{ duration: 0.12 }}
+              className="space-y-1.5"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <div className="space-y-1">
-                  <Label htmlFor="vcard-fn" className="text-xs font-semibold text-foreground">
+                  <Label htmlFor="vcard-fn" className="text-[11px] font-medium text-foreground">
                     Full Name *
                   </Label>
                   <Input
@@ -559,38 +552,38 @@ export function QrContentPanel() {
                     value={vcardName}
                     onChange={(e) => setVcardName(e.target.value)}
                     placeholder="e.g. Alex Morgan"
-                    className="text-sm bg-background border-border/80 focus-visible:ring-primary"
+                    className="h-8 text-xs bg-background border-border/80 focus-visible:ring-primary"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="vcard-org" className="text-xs font-semibold text-foreground">
-                    Organization / Company
+                  <Label htmlFor="vcard-org" className="text-[11px] font-medium text-foreground">
+                    Organization
                   </Label>
                   <Input
                     id="vcard-org"
                     value={vcardOrg}
                     onChange={(e) => setVcardOrg(e.target.value)}
-                    placeholder="e.g. TiloBox Studio"
-                    className="text-sm bg-background border-border/80 focus-visible:ring-primary"
+                    placeholder="e.g. Acme Studio"
+                    className="h-8 text-xs bg-background border-border/80 focus-visible:ring-primary"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="vcard-title" className="text-xs font-semibold text-foreground">
+                  <Label htmlFor="vcard-title" className="text-[11px] font-medium text-foreground">
                     Job Title
                   </Label>
                   <Input
                     id="vcard-title"
                     value={vcardTitle}
                     onChange={(e) => setVcardTitle(e.target.value)}
-                    placeholder="e.g. Creative Lead"
-                    className="text-sm bg-background border-border/80 focus-visible:ring-primary"
+                    placeholder="e.g. Lead Designer"
+                    className="h-8 text-xs bg-background border-border/80 focus-visible:ring-primary"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="vcard-tel" className="text-xs font-semibold text-foreground">
+                  <Label htmlFor="vcard-tel" className="text-[11px] font-medium text-foreground">
                     Phone Number
                   </Label>
                   <Input
@@ -598,12 +591,12 @@ export function QrContentPanel() {
                     value={vcardPhone}
                     onChange={(e) => setVcardPhone(e.target.value)}
                     placeholder="+1 555 019 2834"
-                    className="font-mono text-sm bg-background border-border/80 focus-visible:ring-primary"
+                    className="h-8 font-mono text-xs bg-background border-border/80 focus-visible:ring-primary"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="vcard-email" className="text-xs font-semibold text-foreground">
+                  <Label htmlFor="vcard-email" className="text-[11px] font-medium text-foreground">
                     Email Address
                   </Label>
                   <Input
@@ -611,21 +604,21 @@ export function QrContentPanel() {
                     type="email"
                     value={vcardEmail}
                     onChange={(e) => setVcardEmail(e.target.value)}
-                    placeholder="alex@tilobox.com"
-                    className="text-sm bg-background border-border/80 focus-visible:ring-primary"
+                    placeholder="alex@example.com"
+                    className="h-8 text-xs bg-background border-border/80 focus-visible:ring-primary"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="vcard-web" className="text-xs font-semibold text-foreground">
+                  <Label htmlFor="vcard-web" className="text-[11px] font-medium text-foreground">
                     Website URL
                   </Label>
                   <Input
                     id="vcard-web"
                     value={vcardWebsite}
                     onChange={(e) => setVcardWebsite(e.target.value)}
-                    placeholder="https://tilobox.com"
-                    className="text-sm bg-background border-border/80 focus-visible:ring-primary"
+                    placeholder="https://example.com"
+                    className="h-8 text-xs bg-background border-border/80 focus-visible:ring-primary"
                   />
                 </div>
               </div>
@@ -636,23 +629,23 @@ export function QrContentPanel() {
           {activeCategory === "text" && (
             <motion.div
               key="cat-text"
-              initial={{ opacity: 0, y: 4 }}
+              initial={{ opacity: 0, y: 3 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
-              className="space-y-2"
+              exit={{ opacity: 0, y: -3 }}
+              transition={{ duration: 0.12 }}
+              className="space-y-1.5"
             >
-              <div className="space-y-1.5">
-                <Label htmlFor="input-raw-text" className="text-xs font-semibold text-foreground">
+              <div className="space-y-1">
+                <Label htmlFor="input-raw-text" className="text-[11px] font-medium text-foreground">
                   Text / Table Code / Note
                 </Label>
                 <Textarea
                   id="input-raw-text"
-                  rows={3}
+                  rows={2}
                   value={plainText}
                   onChange={(e) => setPlainText(e.target.value)}
                   placeholder="Enter raw text, table number, or instructions..."
-                  className="text-sm bg-background border-border/80 focus-visible:ring-primary"
+                  className="text-xs bg-background border-border/80 focus-visible:ring-primary resize-none"
                 />
               </div>
             </motion.div>
