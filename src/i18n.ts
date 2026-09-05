@@ -15,6 +15,7 @@ export default getRequestConfig(async ({ locale }) => {
   const messages = deepmerge(defaultMessages, userMessages);
 
   return {
+    locale,
     messages: messages,
   };
 });

@@ -10,7 +10,6 @@ const inter = Inter({ subsets: ["latin"] });
 import { layoutViewport } from "@/lib/layout_data";
 import { Header } from "@/components/Header";
 import { NextIntlClientProvider } from "next-intl";
-import pick from "lodash/pick";
 import React from "react";
 import { getMessages } from "next-intl/server";
 import { cn } from "@/lib/utils";
@@ -32,13 +31,11 @@ export default async function RootLayout({
       <LayoutHead />
       <body className={cn(inter.className, "")}>
         <Providers>
-          <NextIntlClientProvider
-            messages={pick(messages, ["header", "user_button"])}
-          >
+          <NextIntlClientProvider messages={messages}>
             <Header />
+            <div className="min-h-screen flex flex-col">{children}</div>
+            <Footer />
           </NextIntlClientProvider>
-          <div className="min-h-screen flex flex-col">{children}</div>
-          <Footer />
         </Providers>
       </body>
     </html>
