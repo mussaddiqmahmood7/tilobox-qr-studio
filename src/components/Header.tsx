@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { clsx } from "clsx";
@@ -246,11 +246,6 @@ export function Header() {
     {
       name: "TiloBox Ecosystem",
       href: "https://tilobox.com",
-      target: "_blank",
-    },
-    {
-      name: "Invoice App",
-      href: "https://invoice.tilobox.com",
       target: "_blank",
     },
     {

@@ -24,10 +24,17 @@ export const http: typeof fetch = async (input, init) => {
 };
 
 export async function getGitHubStars() {
-  const res = await fetch("https://api.github.com/repos/latentcat/qrbtf", {
-    next: { revalidate: 60 }, // Revalidate every 60 seconds
-  });
-  const data = await res.json();
-
-  return data["stargazers_count"] as number;
+  try {
+    const res = await fetch(
+      "https://api.github.com/repos/mussaddiqmahmood7/tilobox-qr-studio",
+      {
+        next: { revalidate: 60 },
+      },
+    );
+    if (!res.ok) return 0;
+    const data = await res.json();
+    return (data["stargazers_count"] as number) || 0;
+  } catch {
+    return 0;
+  }
 }

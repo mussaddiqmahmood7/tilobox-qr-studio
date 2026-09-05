@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 import {
   Container,
@@ -5,77 +7,59 @@ import {
   SplitRight,
   SplitView,
 } from "@/components/Containers";
-import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDiscord } from "@fortawesome/free-brands-svg-icons";
-import { cn } from "@/lib/utils";
-import { GitHubButton } from "@/components/GitHubButton";
-import { Badge } from "@/components/ui/badge";
-import { LucideScan } from "lucide-react";
 import { ScanButton } from "@/components/ScanButton";
 import { Label } from "@/components/ui/label";
-import { QrbtfLogo } from "@/components/Logos";
-import { useState } from "react";
-import { urlAtom } from "@/lib/states";
-import { useAtom } from "jotai";
 import { UrlInput } from "@/components/hero/UrlInput";
-import { HeroLogo } from "@/components/Header";
-import { TrackLink } from "@/components/TrackComponents";
 import { BusinessPresets } from "@/components/BusinessPresets";
+import { Sparkles, ShieldCheck } from "lucide-react";
+import { BrandMark } from "@/components/BrandMark";
 
 export function SectionHero() {
   const t = useTranslations("index.hero");
 
   return (
-    <div className="_mt-28 _lg: mt-36">
+    <div className="pt-6 pb-2">
       <Container>
-        <div>
-          <h1 className="text-4xl lg:text-5xl font-bold hidden">
-            {t("title")}
-          </h1>
-
-          <HeroLogo />
-
-          <p className="text-base lg:text-lg mt-4 max-w-2xl text-muted-foreground leading-relaxed">
-            {t("subtitle")}{" "}
-            Generate scannable custom QR codes for digital restaurant menus, barber booking, taxi cards, and guest Wi-Fi. 100% in-browser, free, and privacy-first.
-          </p>
-
-          <div className="mt-5 flex flex-wrap items-center gap-3">
-            <a
-              href="https://tilobox.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button size="sm" variant="default" className="gap-2">
-                <span>TiloBox Ecosystem</span>
-                <span className="text-xs bg-primary-foreground/20 px-1.5 py-0.5 rounded">Free</span>
-              </Button>
-            </a>
-            <a
-              href="https://github.com/mussaddiqmahmood7/tilobox-qr-studio"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button size="sm" variant="outline" className="gap-2">
-                <GitHubButton />
-              </Button>
-            </a>
+        {/* Sleek Workspace Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border/50">
+          <div className="flex items-center gap-3">
+            <BrandMark className="h-10 w-10 rounded-xl shadow-xs" />
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+                  Tilo<span className="text-primary">Box</span> QR Studio
+                </h1>
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full">
+                  Agency Studio
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                100% In-Browser Parametric & Artistic QR Generator • Zero Tracking
+              </p>
+            </div>
           </div>
 
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1 bg-muted/60 px-2.5 py-1 rounded-lg border border-border/60">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Zero-Env Private</span>
+            </div>
+            <div className="flex items-center gap-1 bg-muted/60 px-2.5 py-1 rounded-lg border border-border/60">
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>Vector & 4K Print</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Business Presets & URL / Content Input */}
+        <div className="mt-4">
           <SplitView className="gap-y-0">
             <SplitLeft>
               <BusinessPresets />
-              <div className="mt-5 w-full">
-                <Label className="flex justify-between text-sm font-medium mb-1.5">
-                  {t("url")}
-                  <div className="flex items-center gap-3">
-                    {/*<div className="text-sm">*/}
-                    {/*  10*/}
-                    {/*  <span className="opacity-50">/255</span>*/}
-                    {/*</div>*/}
+              <div className="mt-4 w-full">
+                <Label className="flex justify-between text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  <span>{t("url")}</span>
+                  <div className="flex items-center gap-2">
                     <ScanButton name={t("scan")} />
                   </div>
                 </Label>

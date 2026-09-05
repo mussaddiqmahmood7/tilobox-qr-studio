@@ -9,9 +9,10 @@ export function UrlInput() {
   return (
     <>
       <Input
-        placeholder="https://qrbtf.com"
+        placeholder="https://tilobox.com"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
+        className="font-mono text-sm bg-card/60 shadow-2xs border-border/70 focus-visible:ring-primary"
       />
     </>
   );

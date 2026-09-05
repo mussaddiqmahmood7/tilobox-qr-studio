@@ -1,5 +1,5 @@
-import { QrcodePlaceholder } from "@/components/QrcodePlaceholder";
+import { redirect } from "@/navigation";
 
 export default function Page() {
-  return <QrcodePlaceholder />;
+  redirect("/");
 }
