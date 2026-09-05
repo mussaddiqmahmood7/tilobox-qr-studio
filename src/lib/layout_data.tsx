@@ -1,5 +1,4 @@
-import { type Metadata, Viewport } from "next";
-
+﻿import { type Metadata, Viewport } from "next";
 import { getTranslations } from "next-intl/server";
 import React from "react";
 
@@ -11,57 +10,65 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "metadata" });
 
   return {
-    metadataBase: new URL("https://qrbtf.com"),
+    metadataBase: new URL("https://qr.tilobox.com"),
     title: {
-      template: t("title.template"),
+      template: "%s | TiloBox QR Studio",
       default: t("title.default"),
     },
     description: t("description"),
     keywords: [
-      t("keywords.0"),
-      t("keywords.1"),
-      t("keywords.2"),
-      t("keywords.3"),
-      t("keywords.4"),
-      t("keywords.5"),
-      t("keywords.6"),
-      t("keywords.7"),
-      t("keywords.8"),
-      t("keywords.9"),
+      "TiloBox QR Studio",
+      "QR code generator",
+      "Parametric QR code",
+      "Custom QR code",
+      "Restaurant QR menu",
+      "Wi-Fi QR card",
+      "vCard QR",
+      "SVG QR code",
+      "Client-side QR",
     ],
     openGraph: {
-      images:
-        "https://dt00g2eb5etby3xu.public.blob.vercel-storage.com/assets/qrbtf_kv-gXzB1cMYlyXQQrhza3HoQlH1WydQpe.jpg",
+      title: "TiloBox QR Studio – Free Parametric & Artistic QR Code Generator",
+      description:
+        "Generate stunning, scannable custom QR codes for digital restaurant menus, barber booking, taxi cards, and guest Wi-Fi. 100% in-browser, free, and no database required.",
+      siteName: "TiloBox QR Studio",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "TiloBox QR Studio – Free Parametric & Artistic QR Code Generator",
+      description:
+        "Generate stunning, scannable custom QR codes for digital restaurant menus, barber booking, taxi cards, and guest Wi-Fi. 100% in-browser, free, and no database required.",
     },
   };
 }
 
 export const layoutMetadata: Metadata = {
-  metadataBase: new URL("https://qrbtf.com"),
+  metadataBase: new URL("https://qr.tilobox.com"),
   title: {
-    template: "%s - QRBTF",
-    default: "QRBTF - #1 AI QR Code Generator",
+    template: "%s | TiloBox QR Studio",
+    default: "TiloBox QR Studio – Free Parametric & Artistic QR Code Generator",
   },
-  description: "The world's first and best AI QR code generator.",
+  description:
+    "Generate stunning, scannable custom QR codes for digital restaurant menus, barber booking, taxi cards, and guest Wi-Fi. 100% in-browser, free, and no database required.",
   keywords: [
+    "TiloBox QR Studio",
     "QR Code",
-    "qrcode",
-    "AI QR Code",
-    "AI qrcode",
     "Parametric QR Code",
-    "QRBTF",
-    "Mid Real",
-    "midreal",
+    "Artistic QR",
+    "Restaurant QR",
+    "WiFi QR",
+    "vCard QR",
   ],
   openGraph: {
-    // title: 'Troy Ni',
-    images:
-      "https://dt00g2eb5etby3xu.public.blob.vercel-storage.com/assets/qrbtf_kv-gXzB1cMYlyXQQrhza3HoQlH1WydQpe.jpg",
+    title: "TiloBox QR Studio – Free Parametric & Artistic QR Code Generator",
+    description:
+      "The Designer's Studio for Custom-Shaped & Geometric QR Codes. 100% in-browser, free, and no database required.",
   },
 };
 
 export const layoutViewport: Viewport = {
-  themeColor: "black",
+  themeColor: "#0b5fa5",
   width: "device-width",
   height: "device-height",
   initialScale: 1.0,
@@ -74,16 +81,10 @@ export function LayoutHead() {
   return (
     <head>
       <link rel="manifest" href="/manifest.json" />
-      <link
-        rel="apple-touch-icon"
-        href="/apple-touch-icon?<generated>"
-        type="image/<generated>"
-        sizes="<generated>"
-      />
+      <link rel="icon" href="/favicon.ico" sizes="any" />
+      <link rel="icon" href="/icon.svg" type="image/svg+xml" />
       <meta content="yes" name="apple-mobile-web-app-capable" />
-      <meta name="theme-color" content="#000000" />
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5528400803664104"
-        crossOrigin="anonymous"></script>
+      <meta name="theme-color" content="#0b5fa5" />
     </head>
   );
 }

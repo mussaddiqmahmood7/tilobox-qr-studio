@@ -1,32 +1,32 @@
 {
   "metadata": {
     "title": {
-      "template": "%s - QRBTF",
-      "default": "QRBTF - AI QR Code Generator"
+      "template": "%s - TiloBox QR Studio",
+      "default": "TiloBox QR Studio – Free Parametric & Artistic QR Code Generator"
     },
-    "description": "The world's first and best AI QR code generator.",
+    "description": "Generate stunning, scannable custom QR codes for digital restaurant menus, barber booking, taxi cards, and guest Wi-Fi. 100% in-browser, free, and no database required.",
     "keywords": {
-      "0": "QR Code",
-      "1": "qrcode",
-      "2": "AI QR Code",
-      "3": "AI qrcode",
-      "4": "Parametric QR Code",
-      "5": "QRBTF",
-      "6": "Mid Real",
-      "7": "midreal",
-      "8": "",
-      "9": ""
+      "0": "TiloBox QR Studio",
+      "1": "QR Code Generator",
+      "2": "Parametric QR Code",
+      "3": "Custom QR Code",
+      "4": "Restaurant QR Menu",
+      "5": "WiFi QR Code",
+      "6": "vCard QR",
+      "7": "Free QR Generator",
+      "8": "SVG QR Code",
+      "9": "TiloBox"
     }
   },
   "index": {
     "hero": {
-      "title": "QRBTF",
-      "subtitle": "AI & Parametric QR code generator.",
-      "join_discord": "Join our Discord",
-      "by": " By ",
+      "title": "TiloBox QR Studio",
+      "subtitle": "The Designer's Studio for Custom-Shaped & Geometric QR Codes.",
+      "join_discord": "TiloBox Platform",
+      "by": " by ",
       "period": ".",
-      "url": "URL",
-      "scan": "Scan"
+      "url": "Content / Target URL",
+      "scan": "Scan Existing QR"
     },
     "style": {
       "title": "Style",

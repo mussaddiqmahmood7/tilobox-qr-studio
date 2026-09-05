@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Cyberpunk background (slate) -->
+  <rect width="512" height="512" rx="112" fill="#0b0f19" />
+  
+  <!-- Subtle tech borders -->
+  <rect x="24" y="24" width="464" height="464" rx="88" fill="none" stroke="#1e293b" stroke-width="12" />
+  <rect x="40" y="40" width="432" height="432" rx="72" fill="none" stroke="#1e293b" stroke-width="4" stroke-opacity="0.5" />
+
+  <!-- Neon Emerald T -->
+  <g fill="#10b981">
+    <!-- Top Bar with 45-degree chamfers -->
+    <path d="M 168 152 L 376 152 L 376 184 L 344 216 L 136 216 L 136 184 Z" />
+    <!-- Vertical Bar with 45-degree pointed bottom -->
+    <path d="M 224 232 L 288 232 L 288 328 L 256 360 L 224 328 Z" />
+  </g>
+</svg>

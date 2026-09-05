@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 72" fill="none">
+  <!-- TiloBox Official BrandMark Emblem -->
+  <g transform="translate(4, 4) scale(0.125)">
+    <rect width="512" height="512" rx="112" fill="#0B5FA5"/>
+    <rect x="24" y="24" width="464" height="464" rx="88" fill="none" stroke="#9FB2C5" stroke-width="12"/>
+    <rect x="40" y="40" width="432" height="432" rx="72" fill="none" stroke="#9FB2C5" stroke-width="4" stroke-opacity="0.5"/>
+    <g fill="#FFFFFF">
+      <path d="M 168 152 L 376 152 L 376 184 L 344 216 L 136 216 L 136 184 Z"/>
+      <path d="M 224 232 L 288 232 L 288 328 L 256 360 L 224 328 Z"/>
+    </g>
+  </g>
+  <!-- Wordmark -->
+  <text x="80" y="44" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="28" font-weight="900" letter-spacing="-0.5" fill="#1E293B">Tilo<tspan fill="#0B5FA5">Box</tspan></text>
+  <text x="194" y="44" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="24" font-weight="500" letter-spacing="-0.3" fill="#64748B">Invoice</text>
+  <rect x="80" y="52" width="210" height="2" rx="1" fill="#CBD5E1" opacity="0.6"/>
+</svg>

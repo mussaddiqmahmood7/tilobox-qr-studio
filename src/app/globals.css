@@ -3,66 +3,149 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 0%;
+  /* Theme: Soft Slate (Default Light) */
+  :root,
+  .light,
+  [data-theme="soft-slate"] {
+    --background: 210 40% 98%;   /* #f8fafc */
+    --foreground: 222 47% 11%;   /* #0f172a */
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;           /* #ffffff */
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 207 88% 35%;      /* #0b5fa5 TiloBox Cobalt */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%; /* #64748b */
 
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 205 84% 93%;       /* #dff0fc */
+    --accent-foreground: 207 88% 35%; /* #0b5fa5 */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 78% 56%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 10% 3.9%;
+    --border: 214 32% 91%;       /* #e2e8f0 */
+    --input: 214 32% 91%;
+    --ring: 207 88% 35%;         /* #0b5fa5 */
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    --brand-mark-background: #f1f5f9;
+    --brand-mark-border: #94a3b8;
+    --brand-mark-accent: #0b5fa5;
   }
 
-  .dark {
-    --background: 240 10% 0%;
-    --foreground: 0 0% 100%;
+  /* Theme: Cyberpunk Slate (Dark) */
+  .dark,
+  [data-theme="cyberpunk-slate"] {
+    --background: 223 39% 7%;   /* #0b0f19 navy-slate */
+    --foreground: 210 40% 98%;  /* #f8fafc */
 
-    --card: 240 10% 3.9%;
+    --card: 222 47% 11%;        /* #111827 */
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 199 89% 60%;     /* #38bdf8 vivid cyan/sky */
+    --primary-foreground: 223 39% 7%;
+
+    --secondary: 217 33% 17%;   /* #1e293b */
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%; /* #94a3b8 */
+
+    --accent: 217 33% 17%;
+    --accent-foreground: 199 89% 60%;
+
+    --destructive: 0 70% 58%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 217 33% 17%;      /* #1e293b */
+    --input: 217 33% 17%;
+    --ring: 199 89% 60%;
+
+    --brand-mark-background: #0b0f19;
+    --brand-mark-border: #1e293b;
+    --brand-mark-accent: #38bdf8;
+  }
+
+  /* Theme: Classic Obsidian */
+  [data-theme="classic-obsidian"] {
+    --background: 0 0% 0%;       /* #000000 */
+    --foreground: 0 0% 98%;      /* #fafafa */
+
+    --card: 0 0% 4%;            /* #0a0a0a */
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 10% 3.9%;
+    --popover: 0 0% 4%;
     --popover-foreground: 0 0% 98%;
 
     --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
+    --primary-foreground: 0 0% 4%;
 
-    --secondary: 240 3.7% 15.9%;
+    --secondary: 0 0% 9%;       /* #171717 */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 0 0% 9%;
+    --muted-foreground: 0 0% 64%;
 
-    --accent: 240 3.7% 15.9%;
+    --accent: 0 0% 15%;
     --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --border: 0 0% 15%;         /* #262626 */
+    --input: 0 0% 15%;
+    --ring: 0 0% 83%;
+
+    --brand-mark-background: #0a0a0a;
+    --brand-mark-border: #404040;
+    --brand-mark-accent: #fafafa;
+  }
+
+  /* Theme: Paper Light */
+  [data-theme="paper-light"] {
+    --background: 36 33% 97%;    /* #faf8f5 */
+    --foreground: 24 10% 10%;    /* #1c1917 */
+
+    --card: 0 0% 100%;
+    --card-foreground: 24 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 24 10% 10%;
+
+    --primary: 28 80% 32%;      /* #92400e */
+    --primary-foreground: 48 96% 89%;
+
+    --secondary: 30 25% 94%;
+    --secondary-foreground: 25 6% 24%;
+
+    --muted: 30 25% 94%;
+    --muted-foreground: 25 6% 45%;
+
+    --accent: 48 96% 89%;
+    --accent-foreground: 28 80% 32%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 30 20% 88%;
+    --input: 30 20% 88%;
+    --ring: 28 80% 32%;
+
+    --brand-mark-background: #faf8f5;
+    --brand-mark-border: #e7e0d8;
+    --brand-mark-accent: #92400e;
   }
 }
 
@@ -140,4 +223,18 @@ body {
 
 .fixed-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #3f3f46;
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
 }

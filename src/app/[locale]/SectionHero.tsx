@@ -37,41 +37,31 @@ export function SectionHero() {
 
           <HeroLogo />
 
-          <p className="text-base lg:text-lg mt-6 text-foreground/70">
-            {t("subtitle")}
-            {t("by")}
-            <TrackLink
-              trackValue={["latent_cat", "hero"]}
-              href="https://latentcat.com"
-              target="_blank"
-              className="text-foreground underline font-semibold"
-            >
-              Latent Cat
-            </TrackLink>
-            {t("period")}
+          <p className="text-base lg:text-lg mt-4 max-w-2xl text-muted-foreground leading-relaxed">
+            {t("subtitle")}{" "}
+            Generate scannable custom QR codes for digital restaurant menus, barber booking, taxi cards, and guest Wi-Fi. 100% in-browser, free, and privacy-first.
           </p>
 
-          <div className="mt-6 flex gap-3">
-            <TrackLink
-              trackValue={["join_discord", "hero"]}
-              href="https://discord.gg/V9CNuqYfte"
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <a
+              href="https://tilobox.com"
               target="_blank"
+              rel="noopener noreferrer"
             >
-              <Button size="sm" variant="secondary">
-                <FontAwesomeIcon
-                  icon={faDiscord}
-                  className={cn("h-5 w-5 block mr-2")}
-                />
-                {t("join_discord")}
+              <Button size="sm" variant="default" className="gap-2">
+                <span>TiloBox Ecosystem</span>
+                <span className="text-xs bg-primary-foreground/20 px-1.5 py-0.5 rounded">Free</span>
               </Button>
-            </TrackLink>
-            <TrackLink
-              trackValue={["github", "hero"]}
-              href="https://github.com/latentcat/qrbtf"
+            </a>
+            <a
+              href="https://github.com/mussaddiqmahmood7/tilobox-qr-studio"
               target="_blank"
+              rel="noopener noreferrer"
             >
-              <GitHubButton />
-            </TrackLink>
+              <Button size="sm" variant="outline" className="gap-2">
+                <GitHubButton />
+              </Button>
+            </a>
           </div>
 
           <SplitView className="gap-y-0">
