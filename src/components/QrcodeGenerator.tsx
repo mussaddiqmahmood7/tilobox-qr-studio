@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
@@ -9,7 +9,7 @@ import {
   SplitView,
 } from "@/components/Containers";
 import { Form, FormField } from "@/components/ui/form";
-import { Path, PathValue, useForm, useWatch } from "react-hook-form";
+import { DefaultValues, Path, PathValue, useForm, useWatch } from "react-hook-form";
 import {
   ParamBooleanControl,
   ParamColorControl,
@@ -19,7 +19,7 @@ import {
   ParamSelectControl,
   ParamTextControl,
 } from "@/components/QrcodeControlParams";
-import { HTMLAttributes, useEffect, useRef, useState } from "react";
+import React, { HTMLAttributes, useEffect, useMemo, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,14 +28,14 @@ import {
   Download,
   FileCode2,
   Image as ImageIcon,
-  Printer,
+  LayoutTemplate,
   ChevronDown,
   Sparkles,
 } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { StyleTitle } from "@/components/Titles";
 import { useAtom, useAtomValue } from "jotai";
-import { urlAtom, centerLogoAtom } from "@/lib/states";
+import { centerLogoAtom, sharedCustomizerAtom, urlAtom } from "@/lib/states";
 import {
   downloaderMaps,
   svgToSvg,
@@ -82,9 +82,25 @@ export function QrcodeGenerator<P extends {}>(props: QrcodeGeneratorProps<P>) {
 
   const { params, defaultPreset } = props;
   const presets = props.qrcodeModule.presets;
+  const [sharedCustomizer, setSharedCustomizer] = useAtom(sharedCustomizerAtom);
+
+  const initialValues = useMemo(() => {
+    const base = { ...presets[defaultPreset] } as Record<string, unknown>;
+    if (sharedCustomizer.correctLevel && "correct_level" in base) {
+      base.correct_level = sharedCustomizer.correctLevel;
+    }
+    if (sharedCustomizer.foregroundColor) {
+      if ("content_point_color" in base) base.content_point_color = sharedCustomizer.foregroundColor;
+      if ("color" in base) base.color = sharedCustomizer.foregroundColor;
+    }
+    if (sharedCustomizer.positioningColor && "positioning_point_color" in base) {
+      base.positioning_point_color = sharedCustomizer.positioningColor;
+    }
+    return base as unknown as DefaultValues<P>;
+  }, [presets, defaultPreset, sharedCustomizer]);
 
   const form = useForm<P>({
-    defaultValues: presets[defaultPreset],
+    defaultValues: initialValues,
   });
   const componentProps = useWatch({ control: form.control }) as P;
   const [preset, setPreset_] = useState(defaultPreset);
@@ -94,6 +110,24 @@ export function QrcodeGenerator<P extends {}>(props: QrcodeGeneratorProps<P>) {
       form.setValue(key as Path<P>, value as PathValue<P, Path<P>>);
     }
   };
+
+  // Sync form changes to sharedCustomizerAtom so they carry over when switching styles
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      const v = value as Record<string, unknown>;
+      if (typeof v.correct_level === "string") {
+        setSharedCustomizer((prev) => ({ ...prev, correctLevel: v.correct_level as string }));
+      }
+      const fg = typeof v.content_point_color === "string" ? v.content_point_color : typeof v.color === "string" ? v.color : undefined;
+      if (fg) {
+        setSharedCustomizer((prev) => ({ ...prev, foregroundColor: fg }));
+      }
+      if (typeof v.positioning_point_color === "string") {
+        setSharedCustomizer((prev) => ({ ...prev, positioningColor: v.positioning_point_color as string }));
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, setSharedCustomizer]);
 
   // High Error Correction Fail-safe: elevate to high when logo is active
   useEffect(() => {
@@ -135,6 +169,12 @@ export function QrcodeGenerator<P extends {}>(props: QrcodeGeneratorProps<P>) {
         theme.foreground as PathValue<P, Path<P>>,
       );
     }
+    setSharedCustomizer((prev) => ({
+      ...prev,
+      foregroundColor: theme.foreground,
+      positioningColor: theme.positioning,
+      backgroundColor: theme.background,
+    }));
     toast.success("Brand color theme applied to QR code");
   };
 
@@ -281,98 +321,111 @@ export function QrcodeGenerator<P extends {}>(props: QrcodeGeneratorProps<P>) {
                     {t("qrcode_output")}
                   </span>
 
-                  {/* Pro Export Suite Dropdown */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        size="sm"
-                        className="gap-1.5 font-semibold shadow-xs"
-                      >
-                        <Download className="w-4 h-4" />
-                        Export Suite
-                        <ChevronDown className="w-3.5 h-3.5 opacity-80" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56">
-                      <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                        Lossless Vector
-                      </DropdownMenuLabel>
-                      <DropdownMenuItem
-                        onClick={handleExportSvg}
-                        className="gap-2 cursor-pointer"
-                      >
-                        <FileCode2 className="w-4 h-4 text-primary" />
-                        <div className="flex flex-col">
-                          <span className="font-medium text-xs">Vector SVG (.svg)</span>
-                          <span className="text-[10px] text-muted-foreground">
-                            Lossless print & laser cutting
-                          </span>
-                        </div>
-                      </DropdownMenuItem>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleOpenTentModal}
+                      className="gap-1.5 text-xs font-semibold border-primary/40 hover:border-primary hover:bg-primary/10 text-primary shadow-2xs"
+                    >
+                      <LayoutTemplate className="w-3.5 h-3.5" />
+                      Display Cards
+                    </Button>
 
-                      <DropdownMenuSeparator />
+                    {/* Pro Export Suite Dropdown */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          size="sm"
+                          className="gap-1.5 font-semibold shadow-xs"
+                        >
+                          <Download className="w-4 h-4" />
+                          Export QR
+                          <ChevronDown className="w-3.5 h-3.5 opacity-80" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-60">
+                        <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                          Lossless Vector
+                        </DropdownMenuLabel>
+                        <DropdownMenuItem
+                          onClick={handleExportSvg}
+                          className="gap-2 cursor-pointer"
+                        >
+                          <FileCode2 className="w-4 h-4 text-primary" />
+                          <div className="flex flex-col">
+                            <span className="font-medium text-xs">Vector SVG (.svg)</span>
+                            <span className="text-[10px] text-muted-foreground">
+                              Lossless print & laser cutting
+                            </span>
+                          </div>
+                        </DropdownMenuItem>
 
-                      <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                        High-Resolution PNG
-                      </DropdownMenuLabel>
-                      <DropdownMenuItem
-                        onClick={() => handleExportPng(1024)}
-                        className="gap-2 cursor-pointer"
-                      >
-                        <ImageIcon className="w-4 h-4 text-sky-500" />
-                        <div className="flex flex-col">
-                          <span className="font-medium text-xs">Standard PNG (1024px)</span>
-                          <span className="text-[10px] text-muted-foreground">
-                            Web & screen sharing
-                          </span>
-                        </div>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleExportPng(2048)}
-                        className="gap-2 cursor-pointer"
-                      >
-                        <ImageIcon className="w-4 h-4 text-indigo-500" />
-                        <div className="flex flex-col">
-                          <span className="font-medium text-xs">2K Ultra PNG (2048px)</span>
-                          <span className="text-[10px] text-muted-foreground">
-                            Digital menus & flyers
-                          </span>
-                        </div>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleExportPng(4096)}
-                        className="gap-2 cursor-pointer"
-                      >
-                        <ImageIcon className="w-4 h-4 text-emerald-500" />
-                        <div className="flex flex-col">
-                          <span className="font-medium text-xs">4K Print-Ready PNG (4096px)</span>
-                          <span className="text-[10px] text-muted-foreground">
-                            Billboards & signage
-                          </span>
-                        </div>
-                      </DropdownMenuItem>
+                        <DropdownMenuSeparator />
 
-                      <DropdownMenuSeparator />
+                        <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                          High-Resolution PNG
+                        </DropdownMenuLabel>
+                        <DropdownMenuItem
+                          onClick={() => handleExportPng(1024)}
+                          className="gap-2 cursor-pointer"
+                        >
+                          <ImageIcon className="w-4 h-4 text-sky-500" />
+                          <div className="flex flex-col">
+                            <span className="font-medium text-xs">Standard PNG (1024px)</span>
+                            <span className="text-[10px] text-muted-foreground">
+                              Web & screen sharing
+                            </span>
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleExportPng(2048)}
+                          className="gap-2 cursor-pointer"
+                        >
+                          <ImageIcon className="w-4 h-4 text-indigo-500" />
+                          <div className="flex flex-col">
+                            <span className="font-medium text-xs">2K Ultra PNG (2048px)</span>
+                            <span className="text-[10px] text-muted-foreground">
+                              Digital menus & flyers
+                            </span>
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleExportPng(4096)}
+                          className="gap-2 cursor-pointer"
+                        >
+                          <ImageIcon className="w-4 h-4 text-purple-500" />
+                          <div className="flex flex-col">
+                            <span className="font-medium text-xs">4K Master PNG (4096px)</span>
+                            <span className="text-[10px] text-muted-foreground">
+                              Billboards & signage
+                            </span>
+                          </div>
+                        </DropdownMenuItem>
 
-                      <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                        Printable Merchandise
-                      </DropdownMenuLabel>
-                      <DropdownMenuItem
-                        onClick={handleOpenTentModal}
-                        className="gap-2 cursor-pointer bg-primary/5 text-primary focus:bg-primary/10"
-                      >
-                        <Printer className="w-4 h-4 text-primary" />
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-xs">
-                            Printable 4x6 Tent Card
-                          </span>
-                          <span className="text-[10px] text-muted-foreground">
-                            Table stand for restaurant/reception
-                          </span>
-                        </div>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        <DropdownMenuSeparator />
+
+                        <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                          Business Display Cards
+                        </DropdownMenuLabel>
+                        <DropdownMenuItem
+                          onClick={handleOpenTentModal}
+                          className="gap-2 cursor-pointer bg-primary/5 text-primary focus:bg-primary/10"
+                        >
+                          <LayoutTemplate className="w-4 h-4 text-primary" />
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-xs">
+                              Creative Display Card Suite
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              Joy, Tech, VIP, Executive & Minimal cards
+                            </span>
+                          </div>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </Label>
 
                 {/* QR Code Container with Center Logo Live Overlay */}

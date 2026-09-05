@@ -6,7 +6,7 @@ import React, { useEffect } from "react";
 import { ArrowTopRightIcon } from "@radix-ui/react-icons";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { transitionMd, transitionLg } from "@/lib/animations";
 import { BrandMark } from "@/components/BrandMark";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
@@ -107,12 +107,28 @@ function MobileNavigation(
   props: HeaderProps & React.ComponentPropsWithoutRef<"div">,
 ) {
   const [menuOpen, setMenuOpen] = useAtom(menuOpenAtom);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname, setMenuOpen]);
+
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
 
   return (
     <>
       <div
         className={clsx(
-          "fixed top-0 z-20 w-full bg-background/95 backdrop-blur h-14 flex md:hidden items-center justify-between px-4 sm:px-6 border-b border-border/50",
+          "fixed top-0 z-40 w-full bg-background/90 backdrop-blur-md h-14 flex md:hidden items-center justify-between px-4 sm:px-6 border-b border-border/60",
           props.className,
         )}
       >
@@ -122,34 +138,51 @@ function MobileNavigation(
           <Button
             variant="ghost"
             size="icon"
+            className="rounded-lg h-9 w-9 text-foreground hover:bg-muted"
+            aria-label="Toggle navigation menu"
             onClick={() => {
               trackEvent("toggle_menu", { to: !menuOpen });
               setMenuOpen(!menuOpen);
             }}
           >
             {!menuOpen ? (
-              <Bars3Icon className="h-6 w-6 stroke-foreground" />
+              <Bars3Icon className="h-5 w-5 stroke-foreground" />
             ) : (
-              <XMarkIcon className="h-6 w-6 text-foreground" />
+              <XMarkIcon className="h-5 w-5 text-foreground" />
             )}
           </Button>
         </div>
       </div>
-      <div className="md:hidden">
-        <motion.div
-          className={clsx(
-            "fixed z-10 w-full top-0 left-0 bg-background/98 backdrop-blur-md overflow-hidden",
-          )}
-          initial={{ height: 56, opacity: 0 }}
-          animate={{
-            height: menuOpen ? "100%" : 56,
-            opacity: menuOpen ? 1 : 0,
-            pointerEvents: menuOpen ? "auto" : "none",
-          }}
-          transition={transitionLg}
-        >
-          <div className="w-full h-screen top-0 left-0 flex flex-col pt-16 px-6">
-            <nav className="mt-4">
+
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            key="mobile-drawer"
+            className="fixed inset-0 z-50 flex flex-col bg-background/98 backdrop-blur-xl md:hidden"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+          >
+            <div className="flex h-14 items-center justify-between px-4 sm:px-6 border-b border-border/60">
+              <Logo />
+              <div className="flex items-center gap-2">
+                <ThemeSwitcher />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-lg h-9 w-9 text-foreground hover:bg-muted"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <XMarkIcon className="h-5 w-5 text-foreground" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-col flex-1 px-6 py-6 overflow-y-auto">
+              <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                Navigation
+              </div>
               <ul className="flex flex-col gap-2">
                 {props.links.map((item, index) => (
                   <MobileNavItem
@@ -159,21 +192,25 @@ function MobileNavigation(
                   />
                 ))}
               </ul>
-            </nav>
-            <div className="mt-8 pt-6 border-t border-border/60 flex flex-col gap-3">
-              <a
-                href="https://tilobox.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground py-2.5 font-semibold text-sm shadow-sm hover:opacity-90 transition-opacity"
-              >
-                Visit TiloBox Platform
-                <ArrowTopRightIcon className="w-4 h-4" />
-              </a>
+
+              <div className="mt-8 pt-6 border-t border-border/60 flex flex-col gap-3">
+                <a
+                  href="https://tilobox.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground py-3 font-semibold text-sm shadow-sm hover:opacity-90 transition-opacity"
+                >
+                  Visit TiloBox Platform
+                  <ArrowTopRightIcon className="w-4 h-4" />
+                </a>
+                <p className="text-[11px] text-center text-muted-foreground mt-2">
+                  TiloBox QR Studio • 100% In-Browser & Private
+                </p>
+              </div>
             </div>
-          </div>
-        </motion.div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

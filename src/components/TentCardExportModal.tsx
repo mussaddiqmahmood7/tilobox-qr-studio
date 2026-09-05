@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Printer,
   Sparkles,
   Download,
   Palette,
@@ -20,6 +19,12 @@ import {
   Coffee,
   Moon,
   Sparkle,
+  Cpu,
+  Briefcase,
+  Layers,
+  Check,
+  Loader2,
+  PartyPopper,
 } from "lucide-react";
 import { BrandMark } from "@/components/BrandMark";
 import { toast } from "sonner";
@@ -31,80 +36,56 @@ interface TentCardExportModalProps {
   qrSvgHtml: string;
 }
 
-type CardTemplate = "modern_slate" | "bistro_warm" | "midnight_obsidian" | "minimal_clean";
+export type CardTemplate =
+  | "joy_vibrant"
+  | "tech_cyber"
+  | "entertainment_vip"
+  | "business_executive"
+  | "minimal_art";
 
 interface TemplateConfig {
   id: CardTemplate;
   name: string;
+  category: string;
   icon: React.ElementType;
-  bgClass: string;
-  textClass: string;
-  subtextClass: string;
-  borderClass: string;
-  cardBgHex: string;
-  textColorHex: string;
-  subtextColorHex: string;
-  qrBgHex: string;
 }
 
 const TEMPLATES: TemplateConfig[] = [
   {
-    id: "modern_slate",
-    name: "Modern Slate",
-    icon: Sparkles,
-    bgClass: "bg-white",
-    textClass: "text-slate-900",
-    subtextClass: "text-slate-500",
-    borderClass: "border-slate-200",
-    cardBgHex: "#ffffff",
-    textColorHex: "#0f172a",
-    subtextColorHex: "#64748b",
-    qrBgHex: "#ffffff",
+    id: "joy_vibrant",
+    name: "Joy & Vibrant",
+    category: "Events • Cafes • Social",
+    icon: PartyPopper,
   },
   {
-    id: "bistro_warm",
-    name: "Bistro & Cafe",
-    icon: Coffee,
-    bgClass: "bg-[#FAF8F5]",
-    textClass: "text-amber-950",
-    subtextClass: "text-amber-800/80",
-    borderClass: "border-amber-200/80",
-    cardBgHex: "#FAF8F5",
-    textColorHex: "#451a03",
-    subtextColorHex: "#78350f",
-    qrBgHex: "#ffffff",
+    id: "tech_cyber",
+    name: "Tech & Cyber",
+    category: "Startups • Co-working • Dev",
+    icon: Cpu,
   },
   {
-    id: "midnight_obsidian",
-    name: "Midnight Lounge",
+    id: "entertainment_vip",
+    name: "Entertainment & VIP",
+    category: "Lounges • Clubs • Nightlife",
     icon: Moon,
-    bgClass: "bg-[#0B0F19]",
-    textClass: "text-white",
-    subtextClass: "text-slate-400",
-    borderClass: "border-slate-800",
-    cardBgHex: "#0B0F19",
-    textColorHex: "#ffffff",
-    subtextColorHex: "#94a3b8",
-    qrBgHex: "#ffffff",
   },
   {
-    id: "minimal_clean",
-    name: "Minimalist",
+    id: "business_executive",
+    name: "Business & Executive",
+    category: "Corporate • Hotels • Law",
+    icon: Briefcase,
+  },
+  {
+    id: "minimal_art",
+    name: "Minimalist Art",
+    category: "Galleries • Boutiques • Studios",
     icon: Sparkle,
-    bgClass: "bg-white",
-    textClass: "text-black",
-    subtextClass: "text-neutral-500",
-    borderClass: "border-black",
-    cardBgHex: "#ffffff",
-    textColorHex: "#000000",
-    subtextColorHex: "#737373",
-    qrBgHex: "#ffffff",
   },
 ];
 
 const ACCENT_COLORS = [
   { name: "TiloBox Blue", hex: "#0B5FA5" },
-  { name: "Obsidian Black", hex: "#000000" },
+  { name: "Obsidian Black", hex: "#111827" },
   { name: "Emerald Green", hex: "#059669" },
   { name: "Warm Amber", hex: "#D97706" },
   { name: "Royal Violet", hex: "#7C3AED" },
@@ -117,212 +98,357 @@ export function TentCardExportModal({
   qrSvgHtml,
 }: TentCardExportModalProps) {
   const [headline, setHeadline] = useState("Scan to Order & Connect");
-  const [subhead, setSubhead] = useState("Point your camera to view contactless menu");
-  const [businessName, setBusinessName] = useState("Table 5 • TiloBox Guest Suite");
-  const [footerNote, setFooterNote] = useState("Free Guest Access • 100% In-Browser & Private");
-  const [selectedTemplate, setSelectedTemplate] = useState<CardTemplate>("modern_slate");
+  const [subhead, setSubhead] = useState("Point your camera to view contactless menu • No app needed");
+  const [businessName, setBusinessName] = useState("The Brass Bistro");
+  const [stationTag, setStationTag] = useState("Table 12 • Patio Suite");
+  const [footerNote, setFooterNote] = useState("Free Guest Wi-Fi & Ordering • Powered by TiloBox");
+  const [selectedTemplate, setSelectedTemplate] = useState<CardTemplate>("joy_vibrant");
   const [accentColor, setAccentColor] = useState<string>("#0B5FA5");
   const [isExportingPng, setIsExportingPng] = useState(false);
 
-  const currentTemplate = TEMPLATES.find((t) => t.id === selectedTemplate) || TEMPLATES[0];
-
-  const handlePrint = () => {
-    window.print();
-  };
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const handleDownloadCardPng = async () => {
+    if (!cardRef.current) return;
     setIsExportingPng(true);
+    const toastId = toast.loading("Rendering pixel-perfect 300 DPI card image...");
+
     try {
-      // 1200 x 1800 px (exact 4:6 aspect ratio, 300 DPI for crisp physical print)
-      const width = 1200;
-      const height = 1800;
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) throw new Error("Could not acquire 2D canvas context");
+      const { toPng } = await import("html-to-image");
+      const dataUrl = await toPng(cardRef.current, {
+        pixelRatio: 3, // 3x resolution creates ultra-sharp print quality
+        cacheBust: true,
+        quality: 1.0,
+      });
 
-      // 1. Draw Card Background
-      ctx.fillStyle = currentTemplate.cardBgHex;
-      ctx.fillRect(0, 0, width, height);
-
-      // 2. Draw Decorative Card Border
-      ctx.save();
-      ctx.strokeStyle =
-        selectedTemplate === "minimal_clean"
-          ? "#000000"
-          : selectedTemplate === "midnight_obsidian"
-          ? "#1e293b"
-          : selectedTemplate === "bistro_warm"
-          ? "#e7e0d8"
-          : "#e2e8f0";
-      ctx.lineWidth = selectedTemplate === "minimal_clean" ? 6 : 4;
-      ctx.strokeRect(40, 40, width - 80, height - 80);
-      ctx.restore();
-
-      // 3. Header Branding: TiloBox Studio Mark
-      ctx.save();
-      ctx.font = "bold 32px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillStyle = currentTemplate.textColorHex;
-      ctx.fillText("TILOBOX QR STUDIO", width / 2, 130);
-
-      // Subtle hairline under header
-      ctx.strokeStyle =
-        selectedTemplate === "midnight_obsidian"
-          ? "rgba(255,255,255,0.1)"
-          : "rgba(0,0,0,0.08)";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(100, 165);
-      ctx.lineTo(width - 100, 165);
-      ctx.stroke();
-      ctx.restore();
-
-      // 4. Business Station Pill Badge
-      if (businessName.trim()) {
-        ctx.save();
-        ctx.font = "bold 28px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-        const badgeText = businessName.toUpperCase();
-        const textWidth = ctx.measureText(badgeText).width;
-        const badgeW = textWidth + 60;
-        const badgeH = 56;
-        const badgeX = (width - badgeW) / 2;
-        const badgeY = 220;
-
-        ctx.fillStyle = accentColor;
-        ctx.globalAlpha = 0.12;
-        if (typeof ctx.roundRect === "function") {
-          ctx.beginPath();
-          ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 28);
-          ctx.fill();
-        } else {
-          ctx.fillRect(badgeX, badgeY, badgeW, badgeH);
-        }
-
-        ctx.globalAlpha = 1.0;
-        ctx.fillStyle = accentColor;
-        ctx.textAlign = "center";
-        ctx.fillText(badgeText, width / 2, badgeY + 39);
-        ctx.restore();
-      }
-
-      // 5. Headline Text
-      ctx.save();
-      ctx.font = "bold 56px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      ctx.fillStyle = currentTemplate.textColorHex;
-      ctx.textAlign = "center";
-      ctx.fillText(headline, width / 2, 360, width - 180);
-
-      // 6. Subheading Text
-      ctx.font = "normal 32px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      ctx.fillStyle = currentTemplate.subtextColorHex;
-      ctx.fillText(subhead, width / 2, 425, width - 200);
-      ctx.restore();
-
-      // 7. Render QR Code (Centered Square)
-      const qrSize = 720;
-      const qrX = (width - qrSize) / 2;
-      const qrY = 510;
-
-      // Draw QR card container box
-      ctx.save();
-      ctx.fillStyle = currentTemplate.qrBgHex;
-      ctx.shadowColor = "rgba(0,0,0,0.08)";
-      ctx.shadowBlur = 30;
-      ctx.shadowOffsetY = 10;
-      if (typeof ctx.roundRect === "function") {
-        ctx.beginPath();
-        ctx.roundRect(qrX - 20, qrY - 20, qrSize + 40, qrSize + 40, 36);
-        ctx.fill();
-      } else {
-        ctx.fillRect(qrX - 20, qrY - 20, qrSize + 40, qrSize + 40);
-      }
-      ctx.restore();
-
-      // Draw SVG into Canvas
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(qrSvgHtml, "image/svg+xml");
-      const svgEl = doc.querySelector("svg");
-      if (svgEl) {
-        svgEl.setAttribute("width", qrSize.toString());
-        svgEl.setAttribute("height", qrSize.toString());
-        const serializedSvg = new XMLSerializer().serializeToString(svgEl);
-        const qrImage = new Image();
-        const base64Data = btoa(unescape(encodeURIComponent(serializedSvg)));
-
-        await new Promise<void>((resolve, reject) => {
-          qrImage.onload = () => {
-            ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
-            resolve();
-          };
-          qrImage.onerror = reject;
-          qrImage.src = "data:image/svg+xml;base64," + base64Data;
-        });
-      }
-
-      // 8. Footer divider, note & stand fold guideline
-      ctx.save();
-      ctx.strokeStyle =
-        selectedTemplate === "midnight_obsidian"
-          ? "rgba(255,255,255,0.12)"
-          : "rgba(0,0,0,0.1)";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(100, 1550);
-      ctx.lineTo(width - 100, 1550);
-      ctx.stroke();
-
-      // Footer note
-      ctx.font = "bold 28px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillStyle = currentTemplate.textColorHex;
-      ctx.fillText(footerNote, width / 2, 1620);
-
-      // Fold guideline
-      ctx.font = "normal 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      ctx.fillStyle = currentTemplate.subtextColorHex;
-      ctx.fillText("✂️ Table Stand Fold Guideline • Place On Flat Tabletop", width / 2, 1680);
-      ctx.restore();
-
-      // 9. Download PNG
-      const pngUrl = canvas.toDataURL("image/png", 0.98);
       const a = document.createElement("a");
-      a.href = pngUrl;
-      a.download = `TiloBox_Display_Card_${selectedTemplate}_300DPI.png`;
+      a.href = dataUrl;
+      a.download = `tilobox-${selectedTemplate}-card-${Date.now()}.png`;
       a.click();
-      toast.success("300 DPI high-resolution tent card image downloaded");
+      toast.success("300 DPI Card Image downloaded successfully!", { id: toastId });
     } catch (err) {
-      console.error("Card PNG export error:", err);
-      toast.error("Failed to render card image. Please use Print button instead.");
+      console.error("Card export error:", err);
+      toast.error("Could not export card image. Please try again.", { id: toastId });
     } finally {
       setIsExportingPng(false);
     }
   };
 
+  // Render the card according to the selected creative template
+  const renderCardContent = () => {
+    switch (selectedTemplate) {
+      // 1. JOY & VIBRANT TEMPLATE
+      case "joy_vibrant":
+        return (
+          <div
+            ref={cardRef}
+            className="w-[360px] h-[540px] rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden text-slate-800 shadow-xl border-4"
+            style={{
+              borderColor: accentColor,
+              background: "linear-gradient(145deg, #FFFDF7 0%, #FFF7ED 50%, #FEF2F2 100%)",
+            }}
+          >
+            {/* Top decorative badge */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BrandMark className="h-7 w-7 rounded-lg shadow-xs" />
+                <span className="font-extrabold tracking-tight text-sm text-slate-900">
+                  {businessName}
+                </span>
+              </div>
+              <span
+                className="text-[10px] font-bold px-2.5 py-1 rounded-full text-white shadow-xs"
+                style={{ backgroundColor: accentColor }}
+              >
+                ✨ {stationTag} ✨
+              </span>
+            </div>
+
+            {/* Middle QR Container */}
+            <div className="flex flex-col items-center my-auto">
+              <div className="bg-white p-4 rounded-2xl shadow-lg border border-orange-100/80 mb-3 flex items-center justify-center">
+                <div
+                  className="w-[180px] h-[180px] flex items-center justify-center [&>svg]:w-full [&>svg]:h-full"
+                  dangerouslySetInnerHTML={{ __html: qrSvgHtml }}
+                />
+              </div>
+
+              <h2 className="text-lg font-black tracking-tight text-center text-slate-900 mt-1">
+                {headline}
+              </h2>
+              <p className="text-xs text-center text-slate-600 max-w-[280px] mt-1 leading-relaxed font-medium">
+                {subhead}
+              </p>
+            </div>
+
+            {/* Bottom info & fold guide */}
+            <div className="border-t border-dashed border-orange-200 pt-3 flex flex-col items-center text-center">
+              <div className="text-[10px] font-semibold text-slate-500 tracking-wide">
+                {footerNote}
+              </div>
+              <div className="text-[9px] text-slate-400 mt-1 font-mono uppercase tracking-wider">
+                ▲ Fold line for tabletop acrylic stand or tent card ▲
+              </div>
+            </div>
+          </div>
+        );
+
+      // 2. TECH & CYBER TEMPLATE
+      case "tech_cyber":
+        return (
+          <div
+            ref={cardRef}
+            className="w-[360px] h-[540px] rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden text-slate-100 shadow-2xl border-2 bg-[#080C14]"
+            style={{ borderColor: accentColor }}
+          >
+            {/* Cyber corner reticles */}
+            <div className="absolute top-2 left-2 text-[10px] font-mono text-cyan-500/70">[ + ]</div>
+            <div className="absolute top-2 right-2 text-[10px] font-mono text-cyan-500/70">[ + ]</div>
+            <div className="absolute bottom-2 left-2 text-[10px] font-mono text-cyan-500/70">[ + ]</div>
+            <div className="absolute bottom-2 right-2 text-[10px] font-mono text-cyan-500/70">[ + ]</div>
+
+            {/* Header with Monospace protocol */}
+            <div className="flex items-center justify-between border-b border-cyan-900/50 pb-3">
+              <div className="flex items-center gap-2">
+                <BrandMark className="h-7 w-7 rounded-md" />
+                <div>
+                  <div className="font-mono text-xs font-bold text-white tracking-wider uppercase">
+                    {businessName}
+                  </div>
+                  <div className="text-[9px] font-mono text-cyan-400">
+                    {"// PROTOCOL :: "} {stationTag}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 bg-cyan-950/80 border border-cyan-800/80 px-2 py-0.5 rounded text-[10px] font-mono text-cyan-300">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                ONLINE
+              </div>
+            </div>
+
+            {/* Middle QR Container with cyber frame */}
+            <div className="flex flex-col items-center my-auto">
+              <div
+                className="bg-white p-3.5 rounded-xl border-2 shadow-[0_0_20px_rgba(6,182,212,0.15)] mb-3 flex items-center justify-center"
+                style={{ borderColor: accentColor }}
+              >
+                <div
+                  className="w-[180px] h-[180px] flex items-center justify-center [&>svg]:w-full [&>svg]:h-full"
+                  dangerouslySetInnerHTML={{ __html: qrSvgHtml }}
+                />
+              </div>
+
+              <h2 className="font-mono text-base font-bold text-center tracking-tight text-white mt-1">
+                {headline}
+              </h2>
+              <p className="font-mono text-[11px] text-center text-slate-400 max-w-[280px] mt-1 leading-relaxed">
+                {subhead}
+              </p>
+            </div>
+
+            {/* Bottom terminal footer */}
+            <div className="border-t border-cyan-900/50 pt-3 flex flex-col items-center text-center">
+              <div className="text-[10px] font-mono text-slate-400">
+                {footerNote}
+              </div>
+              <div className="text-[9px] font-mono text-cyan-600 mt-1 uppercase tracking-widest">
+                --- DUAL-BAND 5GHZ // NO CLIENT REGISTRATION REQUIRED ---
+              </div>
+            </div>
+          </div>
+        );
+
+      // 3. ENTERTAINMENT & VIP NIGHTLIFE TEMPLATE
+      case "entertainment_vip":
+        return (
+          <div
+            ref={cardRef}
+            className="w-[360px] h-[540px] rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden text-white shadow-2xl border-2 bg-gradient-to-b from-[#110B1E] via-[#0A0713] to-[#07050E]"
+            style={{ borderColor: accentColor }}
+          >
+            {/* Glamour top glow */}
+            <div
+              className="absolute -top-20 -right-20 w-48 h-48 rounded-full blur-3xl opacity-30 pointer-events-none"
+              style={{ backgroundColor: accentColor }}
+            />
+
+            {/* Header: VIP Ticket / Pass look */}
+            <div className="flex items-center justify-between border-b border-purple-900/40 pb-3">
+              <div className="flex items-center gap-2.5">
+                <BrandMark className="h-7 w-7 rounded-xl" />
+                <span className="font-black text-sm tracking-wide text-white uppercase">
+                  {businessName}
+                </span>
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-amber-300 bg-amber-500/15 border border-amber-400/30 px-2.5 py-0.5 rounded-full">
+                ✦ VIP PASS ✦
+              </span>
+            </div>
+
+            {/* QR Card with luminous border */}
+            <div className="flex flex-col items-center my-auto">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-purple-300/80 mb-2">
+                {stationTag}
+              </div>
+
+              <div className="bg-white p-3.5 rounded-2xl shadow-2xl border-2 border-purple-400/40 mb-3 flex items-center justify-center">
+                <div
+                  className="w-[180px] h-[180px] flex items-center justify-center [&>svg]:w-full [&>svg]:h-full"
+                  dangerouslySetInnerHTML={{ __html: qrSvgHtml }}
+                />
+              </div>
+
+              <h2 className="text-lg font-black tracking-tight text-center text-white mt-1">
+                {headline}
+              </h2>
+              <p className="text-xs text-center text-purple-200/70 max-w-[280px] mt-1 leading-relaxed">
+                {subhead}
+              </p>
+            </div>
+
+            {/* VIP Bottom bar */}
+            <div className="border-t border-dashed border-purple-800/40 pt-3 flex flex-col items-center text-center">
+              <div className="text-[10px] text-purple-300 font-medium">
+                {footerNote}
+              </div>
+              <div className="text-[9px] text-purple-400/60 mt-1 uppercase tracking-widest font-mono">
+                ✦ EXCLUSIVE GUEST ACCESS • INSTANT RECOGNITION ✦
+              </div>
+            </div>
+          </div>
+        );
+
+      // 4. BUSINESS & EXECUTIVE TEMPLATE
+      case "business_executive":
+        return (
+          <div
+            ref={cardRef}
+            className="w-[360px] h-[540px] rounded-xl p-7 flex flex-col justify-between relative overflow-hidden text-slate-900 shadow-xl border-2 bg-[#FDFBF7]"
+            style={{ borderColor: accentColor }}
+          >
+            {/* Header: Formal Executive Layout */}
+            <div className="flex flex-col items-center text-center border-b border-slate-300 pb-3">
+              <BrandMark className="h-8 w-8 rounded-lg mb-1.5" />
+              <h1 className="font-serif text-base font-bold tracking-tight text-slate-900">
+                {businessName}
+              </h1>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mt-0.5">
+                {stationTag}
+              </span>
+            </div>
+
+            {/* Middle QR Container */}
+            <div className="flex flex-col items-center my-auto">
+              <div className="bg-white p-3 rounded-lg border border-slate-300 shadow-sm mb-3 flex items-center justify-center">
+                <div
+                  className="w-[170px] h-[170px] flex items-center justify-center [&>svg]:w-full [&>svg]:h-full"
+                  dangerouslySetInnerHTML={{ __html: qrSvgHtml }}
+                />
+              </div>
+
+              <h2 className="font-serif text-base font-bold text-center text-slate-900 mt-1">
+                {headline}
+              </h2>
+              <p className="text-xs text-center text-slate-600 max-w-[270px] mt-1 leading-relaxed">
+                {subhead}
+              </p>
+            </div>
+
+            {/* Bottom Executive Note */}
+            <div className="border-t border-slate-300 pt-3 flex flex-col items-center text-center">
+              <div className="text-[10px] font-medium text-slate-600">
+                {footerNote}
+              </div>
+              <div className="text-[9px] text-slate-400 mt-1 font-serif uppercase tracking-widest">
+                OFFICIAL DESK & SUITE COMPLIMENTARY ACCESS
+              </div>
+            </div>
+          </div>
+        );
+
+      // 5. MINIMALIST ART TEMPLATE
+      case "minimal_art":
+        return (
+          <div
+            ref={cardRef}
+            className="w-[360px] h-[540px] rounded-none p-7 flex flex-col justify-between relative overflow-hidden text-black shadow-xl border-[3px] border-black bg-white"
+          >
+            {/* Top Minimalist Header */}
+            <div className="flex items-start justify-between border-b-2 border-black pb-3">
+              <div>
+                <div className="text-[9px] font-mono uppercase tracking-widest text-neutral-500">
+                  {"EXHIBIT // STATION"}
+                </div>
+                <div className="font-black text-sm uppercase tracking-tighter">
+                  {businessName}
+                </div>
+              </div>
+              <div className="font-mono text-xs font-black uppercase border border-black px-2 py-0.5">
+                {stationTag}
+              </div>
+            </div>
+
+            {/* QR Center */}
+            <div className="flex flex-col items-center my-auto">
+              <div className="p-2 border border-black mb-3 flex items-center justify-center">
+                <div
+                  className="w-[175px] h-[175px] flex items-center justify-center [&>svg]:w-full [&>svg]:h-full"
+                  dangerouslySetInnerHTML={{ __html: qrSvgHtml }}
+                />
+              </div>
+
+              <h2 className="text-base font-black uppercase tracking-tight text-center mt-1">
+                {headline}
+              </h2>
+              <p className="text-xs text-center text-neutral-600 max-w-[270px] mt-1 leading-relaxed font-sans">
+                {subhead}
+              </p>
+            </div>
+
+            {/* Bottom stark footer */}
+            <div className="border-t-2 border-black pt-3 flex flex-col items-start">
+              <div className="text-[10px] font-mono text-neutral-700">
+                {footerNote}
+              </div>
+              <div className="text-[8px] font-mono text-neutral-400 mt-1 uppercase">
+                INDEX :: TILOBOX ARCHIVE EDITION • 100% CLIENT-SIDE
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[92vh] overflow-y-auto">
-        <DialogHeader className="no-print">
-          <DialogTitle className="flex items-center gap-2">
-            <Printer className="w-5 h-5 text-primary" />
-            Printable 4x6 Display Tent Card & Export
-          </DialogTitle>
-          <DialogDescription>
-            Print-ready table stand card for restaurants, barber counters, taxi stands, and guest desks.
-          </DialogDescription>
+      <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto p-4 sm:p-6">
+        <DialogHeader className="pb-3 border-b border-border/60">
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+                <LayoutTemplate className="w-5 h-5 text-primary" />
+                Creative Display Card Studio
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                Choose a creative template, personalize station details, and download a pixel-perfect 300 DPI high-resolution PNG card.
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-2">
-          {/* Left Column: Customization Controls */}
-          <div className="space-y-4 no-print">
-            {/* Template Selector */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4">
+          {/* Left Controls Column (5 cols) */}
+          <div className="lg:col-span-5 space-y-4">
+            {/* 1. Template Picker */}
             <div className="space-y-2">
-              <Label className="text-xs font-semibold flex items-center gap-1.5">
-                <LayoutTemplate className="w-3.5 h-3.5 text-primary" />
-                <span>Card Template</span>
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-primary" />
+                Select Creative Template
               </Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-1.5">
                 {TEMPLATES.map((tmpl) => {
                   const Icon = tmpl.icon;
                   const isSelected = selectedTemplate === tmpl.id;
@@ -332,175 +458,156 @@ export function TentCardExportModal({
                       type="button"
                       onClick={() => setSelectedTemplate(tmpl.id)}
                       className={cn(
-                        "flex items-center gap-2 p-2.5 rounded-xl border text-xs font-medium transition-all text-left",
+                        "flex items-center justify-between p-2.5 rounded-xl border text-start transition-all",
                         isSelected
-                          ? "border-primary bg-primary/10 text-primary font-bold shadow-2xs"
-                          : "border-border/70 hover:border-border hover:bg-muted/40 text-muted-foreground",
+                          ? "border-primary bg-primary/10 shadow-xs ring-1 ring-primary/40 text-foreground"
+                          : "border-border/70 hover:border-border hover:bg-muted/40 text-muted-foreground"
                       )}
                     >
-                      <Icon className="w-3.5 h-3.5 shrink-0" />
-                      <span className="truncate">{tmpl.name}</span>
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className={cn(
+                            "p-1.5 rounded-lg border",
+                            isSelected
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-muted border-border"
+                          )}
+                        >
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold text-foreground">
+                            {tmpl.name}
+                          </div>
+                          <div className="text-[10px] text-muted-foreground">
+                            {tmpl.category}
+                          </div>
+                        </div>
+                      </div>
+                      {isSelected && <Check className="w-4 h-4 text-primary shrink-0" />}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Accent Color Picker */}
+            {/* 2. Accent Color Picker */}
             <div className="space-y-2">
-              <Label className="text-xs font-semibold flex items-center gap-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                 <Palette className="w-3.5 h-3.5 text-primary" />
-                <span>Accent Color</span>
+                Accent Color Swatch
               </Label>
-              <div className="flex flex-wrap items-center gap-2">
-                {ACCENT_COLORS.map((c) => (
+              <div className="flex flex-wrap gap-2">
+                {ACCENT_COLORS.map((col) => (
                   <button
-                    key={c.hex}
+                    key={col.hex}
                     type="button"
-                    title={c.name}
-                    onClick={() => setAccentColor(c.hex)}
+                    title={col.name}
+                    onClick={() => setAccentColor(col.hex)}
                     className={cn(
-                      "w-6 h-6 rounded-full border-2 transition-transform hover:scale-110",
-                      accentColor === c.hex
-                        ? "border-foreground scale-110 shadow-xs ring-2 ring-primary/40 ring-offset-1"
-                        : "border-transparent",
+                      "w-7 h-7 rounded-full border-2 transition-transform hover:scale-110",
+                      accentColor === col.hex
+                        ? "border-primary ring-2 ring-primary/40 scale-110"
+                        : "border-white/50 dark:border-black/50"
                     )}
-                    style={{ backgroundColor: c.hex }}
+                    style={{ backgroundColor: col.hex }}
                   />
                 ))}
               </div>
             </div>
 
-            {/* Text Inputs */}
-            <div className="space-y-3">
+            {/* 3. Text & Card Details */}
+            <div className="space-y-2.5 pt-1">
               <div className="space-y-1">
-                <Label htmlFor="tent-title" className="text-xs">Main Headline</Label>
+                <Label htmlFor="card-venue" className="text-xs font-medium">
+                  Business / Venue Name
+                </Label>
                 <Input
-                  id="tent-title"
-                  value={headline}
-                  onChange={(e) => setHeadline(e.target.value)}
-                  placeholder="Scan to Order & Connect"
-                  className="text-xs"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="tent-sub" className="text-xs">Subheading</Label>
-                <Input
-                  id="tent-sub"
-                  value={subhead}
-                  onChange={(e) => setSubhead(e.target.value)}
-                  placeholder="Point your smartphone camera"
-                  className="text-xs"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="tent-business" className="text-xs">Business / Station Badge</Label>
-                <Input
-                  id="tent-business"
+                  id="card-venue"
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
-                  placeholder="e.g. Table 12 • Salon Chair 3"
-                  className="text-xs"
+                  className="h-8 text-xs font-medium"
                 />
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="tent-footer" className="text-xs">Footer Note</Label>
+                <Label htmlFor="card-station" className="text-xs font-medium">
+                  Station / Table / Room Tag
+                </Label>
                 <Input
-                  id="tent-footer"
+                  id="card-station"
+                  value={stationTag}
+                  onChange={(e) => setStationTag(e.target.value)}
+                  className="h-8 text-xs font-medium"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="card-headline" className="text-xs font-medium">
+                  Main Headline
+                </Label>
+                <Input
+                  id="card-headline"
+                  value={headline}
+                  onChange={(e) => setHeadline(e.target.value)}
+                  className="h-8 text-xs font-medium"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="card-subhead" className="text-xs font-medium">
+                  Subtitle / Instructions
+                </Label>
+                <Input
+                  id="card-subhead"
+                  value={subhead}
+                  onChange={(e) => setSubhead(e.target.value)}
+                  className="h-8 text-xs font-medium"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="card-footer" className="text-xs font-medium">
+                  Footer Note / Wi-Fi Note
+                </Label>
+                <Input
+                  id="card-footer"
                   value={footerNote}
                   onChange={(e) => setFooterNote(e.target.value)}
-                  placeholder="Free Access • No App Required"
-                  className="text-xs"
+                  className="h-8 text-xs font-medium"
                 />
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="pt-2 space-y-2">
+            {/* Download Action */}
+            <div className="pt-2">
               <Button
-                type="button"
-                onClick={handlePrint}
-                className="w-full gap-2 shadow-sm font-semibold"
-              >
-                <Printer className="w-4 h-4" />
-                Print 4x6 Card (Cardstock)
-              </Button>
-
-              <Button
-                type="button"
-                variant="outline"
-                disabled={isExportingPng}
                 onClick={handleDownloadCardPng}
-                className="w-full gap-2 border-border/80 shadow-2xs font-semibold"
+                disabled={isExportingPng}
+                className="w-full gap-2 py-5 font-semibold text-sm shadow-md"
               >
-                <Download className="w-4 h-4 text-primary" />
-                {isExportingPng ? "Rendering Image..." : "Download Card Image (300 DPI PNG)"}
+                {isExportingPng ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                Download Card Image (300 DPI PNG)
               </Button>
-
-              <p className="text-[11px] text-muted-foreground text-center">
-                Formatted for standard 4&quot; x 6&quot; (100mm x 150mm) photo or cardstock prints.
+              <p className="text-[11px] text-center text-muted-foreground mt-1.5">
+                Exact pixel-perfect render • Ready for cardstock printing or digital display
               </p>
             </div>
           </div>
 
-          {/* Right Column: 4x6 Tent Card Live Preview */}
-          <div className="flex flex-col items-center justify-center bg-muted/40 p-4 rounded-xl border border-border/60">
-            <div
-              id="tent-card-print-target"
-              className={cn(
-                "w-[260px] sm:w-[280px] aspect-[4/6] rounded-xl shadow-lg border p-5 flex flex-col justify-between items-center text-center relative overflow-hidden transition-all",
-                currentTemplate.bgClass,
-                currentTemplate.textClass,
-                currentTemplate.borderClass,
-              )}
-            >
-              {/* Header Branding */}
-              <div className="w-full flex items-center justify-center gap-2 pt-1 border-b pb-2 border-current/10">
-                <BrandMark className="h-5 w-5 rounded-md shadow-2xs" />
-                <span className="text-[11px] font-black tracking-tight uppercase">
-                  TiloBox QR Studio
-                </span>
-              </div>
+          {/* Right Live Preview Column (7 cols) */}
+          <div className="lg:col-span-7 flex flex-col items-center justify-center p-4 sm:p-6 bg-muted/40 rounded-2xl border border-border/60">
+            <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+              Live Card Preview
+            </div>
 
-              {/* Title & Badge */}
-              <div className="my-auto space-y-1">
-                {businessName && (
-                  <span
-                    className="inline-block text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full"
-                    style={{
-                      backgroundColor: `${accentColor}18`,
-                      color: accentColor,
-                    }}
-                  >
-                    {businessName}
-                  </span>
-                )}
-                <h3 className="text-sm sm:text-base font-extrabold tracking-tight leading-snug">
-                  {headline}
-                </h3>
-                <p className={cn("text-[10px] sm:text-[11px] leading-tight", currentTemplate.subtextClass)}>
-                  {subhead}
-                </p>
-              </div>
-
-              {/* QR Code Container */}
-              <div
-                className="w-40 h-40 sm:w-44 sm:h-44 my-2 flex items-center justify-center bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-sm"
-                dangerouslySetInnerHTML={{ __html: qrSvgHtml }}
-              />
-
-              {/* Bottom Footer & Fold line */}
-              <div className="w-full pt-2 border-t border-current/10 text-center space-y-0.5">
-                <p className="text-[10px] font-medium">
-                  {footerNote}
-                </p>
-                <div className={cn("flex items-center justify-center gap-1 text-[9px]", currentTemplate.subtextClass)}>
-                  <span>✂️ Stand Fold Guideline</span>
-                </div>
-              </div>
+            {/* Live rendered Card Container */}
+            <div className="overflow-hidden p-2 flex items-center justify-center">
+              {renderCardContent()}
             </div>
           </div>
         </div>

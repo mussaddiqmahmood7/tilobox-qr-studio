@@ -1,87 +1,85 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { LucideScan } from "lucide-react";
-import { useEffect, useRef } from "react";
-import { useAtom } from "jotai/index";
+import { LucideScan, Loader2 } from "lucide-react";
+import React, { useRef, useState } from "react";
+import { useAtom } from "jotai";
 import { urlAtom } from "@/lib/states";
 import { toast } from "sonner";
 import { trackEvent } from "@/components/TrackComponents";
 
 export function ScanButton(props: { name: string }) {
   const scanRef = useRef<HTMLInputElement>(null);
-  const [url, setUrl] = useAtom(urlAtom);
+  const [, setUrl] = useAtom(urlAtom);
+  const [isScanning, setIsScanning] = useState(false);
 
-  // 准备扫描库、挂上监听函数，返回取消监听的方法
-  const prepareScan = async () => {
-    // 这样做的目的是，在页面加载完后加载扫描模块，因为不是每个人都会用到这个功能，延迟加载
-    const Html5Qrcode = await import("html5-qrcode").then(
-      (module) => module.Html5Qrcode,
-    );
-    const html5QrCode = new Html5Qrcode(/* element id */ "qr-input-file");
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
-    // 挂在按钮上的监听函数
-    const onFileChange = () => {
-      // react 相关的非空判定
-      if (!scanRef.current) return;
-      if (!scanRef.current?.files) return;
-      if (scanRef.current?.files?.length == 0) return;
+    const file = files[0];
+    setIsScanning(true);
+    const toastId = toast.loading("Analyzing and scanning QR image...");
 
-      // 获取文件
-      const imageFile = scanRef.current.files[0];
+    try {
+      const { Html5Qrcode } = await import("html5-qrcode");
+      const scanner = new Html5Qrcode("qr-scan-hidden-container");
 
-      // 执行扫描
-      html5QrCode
-        .scanFile(imageFile, true)
-        .then((decodedText) => {
-          // 成功后设置 url，蹦出 success toast
-          setUrl(decodedText);
-          toast.success("Scan succeeded");
-        })
-        .catch((err) => {
-          // 失败时蹦出 error toast
-          console.log(`Scan error: ${err}`);
-          toast.error("Scan error");
-        });
-    };
+      const decodedText = await scanner.scanFile(file, true);
+      scanner.clear();
 
-    // 按钮变化时执行监听
-    scanRef.current?.addEventListener("change", onFileChange);
-
-    // 返回取消监听的函数，注意，是一个封装在 () => (() => void) 里的函数
-    return () => scanRef.current?.removeEventListener("change", onFileChange);
+      if (decodedText) {
+        setUrl(decodedText);
+        toast.success("QR code decoded successfully!", { id: toastId });
+        trackEvent("scan_qrcode_success");
+      } else {
+        toast.error("No readable QR code found in this image.", { id: toastId });
+      }
+    } catch (err: unknown) {
+      console.warn("QR Scan error:", err);
+      toast.error(
+        "Could not detect a valid QR code. Please ensure the QR is clearly visible, well-lit, and uncropped.",
+        { id: toastId }
+      );
+    } finally {
+      setIsScanning(false);
+      // Reset input value so re-scanning the same file or retrying triggers change
+      if (scanRef.current) {
+        scanRef.current.value = "";
+      }
+    }
   };
-
-  // 在 useEffect 的生命周期中挂上监听和取消监听
-  useEffect(() => {
-    let removeListener: () => void = () => {};
-    prepareScan().then((f) => (removeListener = f));
-    return () => {
-      removeListener();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <>
+      {/* Hidden dedicated div container for Html5Qrcode engine */}
+      <div id="qr-scan-hidden-container" className="hidden" aria-hidden="true" />
+
       <input
         ref={scanRef}
         id="qr-input-file"
         type="file"
         accept="image/*"
         className="hidden"
+        onChange={handleFileChange}
       />
+
       <Badge
         onClick={(evt) => {
           evt.preventDefault();
+          if (isScanning) return;
           scanRef.current?.click();
           trackEvent("upload_qrcode_button");
         }}
-        className="rounded-md hover:bg-accent cursor-pointer"
+        className="rounded-md hover:bg-accent cursor-pointer transition-colors"
         variant="outline"
       >
-        <LucideScan className="w-4 h-4 mr-1" />
-        {props.name}
+        {isScanning ? (
+          <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
+        ) : (
+          <LucideScan className="w-3.5 h-3.5 mr-1" />
+        )}
+        {isScanning ? "Scanning..." : props.name}
       </Badge>
     </>
   );

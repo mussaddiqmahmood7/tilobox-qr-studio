@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { useAtom } from "jotai";
@@ -31,6 +31,7 @@ import {
   Sparkles,
   Info,
   Check,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -40,9 +41,21 @@ export function BusinessPresets() {
   const [guidanceTip, setGuidanceTip] = useState<string | null>(null);
 
   // Modal States
+  const [restaurantModalOpen, setRestaurantModalOpen] = useState(false);
+  const [barberModalOpen, setBarberModalOpen] = useState(false);
   const [wifiModalOpen, setWifiModalOpen] = useState(false);
   const [taxiModalOpen, setTaxiModalOpen] = useState(false);
   const [vcardModalOpen, setVcardModalOpen] = useState(false);
+
+  // Restaurant form state
+  const [restaurantName, setRestaurantName] = useState("The Brass Bistro");
+  const [restaurantTable, setRestaurantTable] = useState("Table 12");
+  const [restaurantMenuUrl, setRestaurantMenuUrl] = useState("https://menu.tilobox.com/bistro");
+
+  // Barber form state
+  const [barberShop, setBarberShop] = useState("Crown Barber Studio");
+  const [barberStylist, setBarberStylist] = useState("Marcus & Stylists");
+  const [barberUrl, setBarberUrl] = useState("https://booking.tilobox.com/crown-barber");
 
   // Wi-Fi form state
   const [wifiSsid, setWifiSsid] = useState("TiloBox-Guest");
@@ -63,24 +76,38 @@ export function BusinessPresets() {
   const [vcardWebsite, setVcardWebsite] = useState("https://tilobox.com");
 
   // Handlers
-  const applyRestaurantPreset = () => {
-    const target = "https://menu.tilobox.com/table-12";
-    setUrl(target);
+  const handleApplyRestaurant = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!restaurantMenuUrl) {
+      toast.error("Menu URL is required");
+      return;
+    }
+    const cleanUrl = restaurantMenuUrl.trim();
+    const finalUrl = restaurantTable
+      ? `${cleanUrl}${cleanUrl.includes("?") ? "&" : "?"}table=${encodeURIComponent(restaurantTable)}`
+      : cleanUrl;
+    setUrl(finalUrl);
     setActivePreset("restaurant");
     setGuidanceTip(
-      "🍽️ Restaurant Menu Active: For dim table environments, choose high contrast (dark foreground, pure white background) with Error Correction Q or H so guests can scan effortlessly from any phone angle."
+      `🍽️ Restaurant Menu Active for "${restaurantName}" (${restaurantTable || "Main Menu"}): Pointing a phone camera opens your live digital menu instantly without physical paper menus. Use our Display Card Suite below to generate a tabletop display!`
     );
-    toast.success("Restaurant digital menu preset applied");
+    setRestaurantModalOpen(false);
+    toast.success("Digital Menu preset configured");
   };
 
-  const applyBarberPreset = () => {
-    const target = "https://booking.tilobox.com/studio-stylist";
-    setUrl(target);
+  const handleApplyBarber = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!barberUrl) {
+      toast.error("Booking URL is required");
+      return;
+    }
+    setUrl(barberUrl.trim());
     setActivePreset("barber");
     setGuidanceTip(
-      "💇 Barber & Salon Active: Pre-filled direct appointment booking link. Perfect for reception desk acrylic blocks, workstation mirror stickers, and business counter cards."
+      `💇 Barber & Salon Active for "${barberShop}": Pointing a phone camera opens direct appointment scheduling for ${barberStylist}. Place on mirror stickers, workstation blocks, or checkout cards.`
     );
-    toast.success("Barber & salon booking preset applied");
+    setBarberModalOpen(false);
+    toast.success("Barber booking preset configured");
   };
 
   const handleApplyWifi = (e: React.FormEvent) => {
@@ -89,13 +116,12 @@ export function BusinessPresets() {
       toast.error("Network SSID is required");
       return;
     }
-    // Format: WIFI:T:WPA;S:Network;P:Password;;
     const enc = wifiEncryption === "nopass" ? "nopass" : wifiEncryption;
     const formatted = `WIFI:T:${enc};S:${wifiSsid};P:${wifiPassword};;`;
     setUrl(formatted);
     setActivePreset("wifi");
     setGuidanceTip(
-      `📶 Wi-Fi Card Active: Pointing phone camera at this QR code prompts instant connection to "${wifiSsid}". Use our Printable Tent Card below to place on your guest tables!`
+      `📶 Wi-Fi Card Active: Pointing phone camera at this QR code prompts instant connection to "${wifiSsid}" without typing passwords. Place on table tent cards!`
     );
     setWifiModalOpen(false);
     toast.success("Guest Wi-Fi connection QR configured");
@@ -151,7 +177,7 @@ export function BusinessPresets() {
     setUrl(vcard);
     setActivePreset("vcard");
     setGuidanceTip(
-      "💼 vCard Business Card Active: Scanning this QR prompts users to instantly save contact details into their phone address book with zero manual typing."
+      "💼 vCard Contact Card Active: Scanning this QR prompts users to instantly save contact details into their phone address book with zero manual typing."
     );
     setVcardModalOpen(false);
     toast.success("vCard digital contact code generated");
@@ -159,13 +185,17 @@ export function BusinessPresets() {
 
   return (
     <div className="w-full mt-4">
-      {/* Preset tabs bar */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-primary" />
-            Quick Business Presets
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
+              Quick Business Presets
+            </span>
+            <span className="hidden sm:inline text-[11px] text-muted-foreground/70">
+              • Ready-to-use business templates with auto-formatting
+            </span>
+          </div>
           {activePreset && (
             <button
               onClick={() => {
@@ -184,31 +214,41 @@ export function BusinessPresets() {
           {/* 1. Restaurant */}
           <button
             type="button"
-            onClick={applyRestaurantPreset}
+            onClick={() => setRestaurantModalOpen(true)}
             className={cn(
-              "flex items-center justify-center sm:justify-start gap-2 px-3 py-2 rounded-xl border text-xs font-medium transition-all",
+              "flex flex-col items-start p-2.5 rounded-xl border text-start transition-all",
               activePreset === "restaurant"
                 ? "border-primary bg-primary/10 text-primary shadow-xs ring-1 ring-primary/30"
                 : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:bg-card hover:text-foreground"
             )}
           >
-            <Utensils className="w-4 h-4 shrink-0 text-amber-500" />
-            <span className="truncate">Digital Menu</span>
+            <div className="flex items-center gap-1.5 w-full">
+              <Utensils className="w-4 h-4 shrink-0 text-amber-500" />
+              <span className="font-semibold text-xs text-foreground truncate">Digital Menu</span>
+            </div>
+            <span className="text-[10px] text-muted-foreground mt-0.5 truncate w-full">
+              Table & PDF link
+            </span>
           </button>
 
           {/* 2. Barber */}
           <button
             type="button"
-            onClick={applyBarberPreset}
+            onClick={() => setBarberModalOpen(true)}
             className={cn(
-              "flex items-center justify-center sm:justify-start gap-2 px-3 py-2 rounded-xl border text-xs font-medium transition-all",
+              "flex flex-col items-start p-2.5 rounded-xl border text-start transition-all",
               activePreset === "barber"
                 ? "border-primary bg-primary/10 text-primary shadow-xs ring-1 ring-primary/30"
                 : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:bg-card hover:text-foreground"
             )}
           >
-            <Scissors className="w-4 h-4 shrink-0 text-indigo-500" />
-            <span className="truncate">Barber Booking</span>
+            <div className="flex items-center gap-1.5 w-full">
+              <Scissors className="w-4 h-4 shrink-0 text-indigo-500" />
+              <span className="font-semibold text-xs text-foreground truncate">Barber Booking</span>
+            </div>
+            <span className="text-[10px] text-muted-foreground mt-0.5 truncate w-full">
+              Appointments
+            </span>
           </button>
 
           {/* 3. Taxi */}
@@ -216,14 +256,19 @@ export function BusinessPresets() {
             type="button"
             onClick={() => setTaxiModalOpen(true)}
             className={cn(
-              "flex items-center justify-center sm:justify-start gap-2 px-3 py-2 rounded-xl border text-xs font-medium transition-all",
+              "flex flex-col items-start p-2.5 rounded-xl border text-start transition-all",
               activePreset === "taxi"
                 ? "border-primary bg-primary/10 text-primary shadow-xs ring-1 ring-primary/30"
                 : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:bg-card hover:text-foreground"
             )}
           >
-            <Car className="w-4 h-4 shrink-0 text-emerald-500" />
-            <span className="truncate">Taxi / Dispatch</span>
+            <div className="flex items-center gap-1.5 w-full">
+              <Car className="w-4 h-4 shrink-0 text-emerald-500" />
+              <span className="font-semibold text-xs text-foreground truncate">Taxi Dispatch</span>
+            </div>
+            <span className="text-[10px] text-muted-foreground mt-0.5 truncate w-full">
+              WhatsApp & Call
+            </span>
           </button>
 
           {/* 4. Guest Wi-Fi */}
@@ -231,14 +276,19 @@ export function BusinessPresets() {
             type="button"
             onClick={() => setWifiModalOpen(true)}
             className={cn(
-              "flex items-center justify-center sm:justify-start gap-2 px-3 py-2 rounded-xl border text-xs font-medium transition-all",
+              "flex flex-col items-start p-2.5 rounded-xl border text-start transition-all",
               activePreset === "wifi"
                 ? "border-primary bg-primary/10 text-primary shadow-xs ring-1 ring-primary/30"
                 : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:bg-card hover:text-foreground"
             )}
           >
-            <Wifi className="w-4 h-4 shrink-0 text-sky-500" />
-            <span className="truncate">Guest Wi-Fi</span>
+            <div className="flex items-center gap-1.5 w-full">
+              <Wifi className="w-4 h-4 shrink-0 text-sky-500" />
+              <span className="font-semibold text-xs text-foreground truncate">Guest Wi-Fi</span>
+            </div>
+            <span className="text-[10px] text-muted-foreground mt-0.5 truncate w-full">
+              1-Tap Auto Connect
+            </span>
           </button>
 
           {/* 5. vCard */}
@@ -246,14 +296,19 @@ export function BusinessPresets() {
             type="button"
             onClick={() => setVcardModalOpen(true)}
             className={cn(
-              "col-span-2 sm:col-span-1 flex items-center justify-center sm:justify-start gap-2 px-3 py-2 rounded-xl border text-xs font-medium transition-all",
+              "col-span-2 sm:col-span-1 flex flex-col items-start p-2.5 rounded-xl border text-start transition-all",
               activePreset === "vcard"
                 ? "border-primary bg-primary/10 text-primary shadow-xs ring-1 ring-primary/30"
                 : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:bg-card hover:text-foreground"
             )}
           >
-            <Contact2 className="w-4 h-4 shrink-0 text-purple-500" />
-            <span className="truncate">vCard Card</span>
+            <div className="flex items-center gap-1.5 w-full">
+              <Contact2 className="w-4 h-4 shrink-0 text-purple-500" />
+              <span className="font-semibold text-xs text-foreground truncate">vCard Profile</span>
+            </div>
+            <span className="text-[10px] text-muted-foreground mt-0.5 truncate w-full">
+              Save to Contacts
+            </span>
           </button>
         </div>
 
@@ -266,6 +321,133 @@ export function BusinessPresets() {
         )}
       </div>
 
+      {/* Digital Menu Modal */}
+      <Dialog open={restaurantModalOpen} onOpenChange={setRestaurantModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Utensils className="w-5 h-5 text-amber-500" />
+              Configure Restaurant Digital Menu QR
+            </DialogTitle>
+            <DialogDescription>
+              Guests scan this QR code on their table to browse your contactless food and drink menu on their phone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleApplyRestaurant} className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="rest-name">Restaurant / Cafe Name</Label>
+              <Input
+                id="rest-name"
+                value={restaurantName}
+                onChange={(e) => setRestaurantName(e.target.value)}
+                placeholder="e.g. The Brass Bistro"
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="rest-url">Digital Menu or Website URL</Label>
+              <Input
+                id="rest-url"
+                value={restaurantMenuUrl}
+                onChange={(e) => setRestaurantMenuUrl(e.target.value)}
+                placeholder="https://menu.yourrestaurant.com"
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="rest-table">Table / Station Identification (Optional)</Label>
+              <Input
+                id="rest-table"
+                value={restaurantTable}
+                onChange={(e) => setRestaurantTable(e.target.value)}
+                placeholder="e.g. Table 12, Booth 4, Patio 2"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Appends ?table=12 to URL so orders and table requests are instantly identified.
+              </p>
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setRestaurantModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" className="gap-1.5">
+                <Check className="w-4 h-4" /> Apply Menu Preset
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Barber & Salon Booking Modal */}
+      <Dialog open={barberModalOpen} onOpenChange={setBarberModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Scissors className="w-5 h-5 text-indigo-500" />
+              Configure Barber & Salon Booking QR
+            </DialogTitle>
+            <DialogDescription>
+              Display this on mirror stickers and counter cards so clients can schedule their next appointment in 3 seconds.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleApplyBarber} className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="barber-shop">Shop / Salon Name</Label>
+              <Input
+                id="barber-shop"
+                value={barberShop}
+                onChange={(e) => setBarberShop(e.target.value)}
+                placeholder="e.g. Crown Barber Studio"
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="barber-stylist">Stylist / Team Name</Label>
+              <Input
+                id="barber-stylist"
+                value={barberStylist}
+                onChange={(e) => setBarberStylist(e.target.value)}
+                placeholder="e.g. Marcus & Team"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="barber-url">Booking URL (Calendly, Fresha, Square, Instagram)</Label>
+              <Input
+                id="barber-url"
+                value={barberUrl}
+                onChange={(e) => setBarberUrl(e.target.value)}
+                placeholder="https://booking.yoursalon.com"
+                required
+              />
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setBarberModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" className="gap-1.5">
+                <Check className="w-4 h-4" /> Apply Booking Preset
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* Guest Wi-Fi Modal */}
       <Dialog open={wifiModalOpen} onOpenChange={setWifiModalOpen}>
         <DialogContent className="sm:max-w-md">
@@ -275,7 +457,7 @@ export function BusinessPresets() {
               Configure Guest Wi-Fi QR Card
             </DialogTitle>
             <DialogDescription>
-              Guests can scan this code with their smartphone camera to connect to your Wi-Fi automatically without typing passwords.
+              Guests scan this code with their smartphone camera to connect to your Wi-Fi automatically without typing passwords.
             </DialogDescription>
           </DialogHeader>
 

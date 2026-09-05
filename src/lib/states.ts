@@ -19,3 +19,15 @@ export const defaultCenterLogoConfig: CenterLogoConfig = {
 
 export const urlAtom = atom<string>("");
 export const centerLogoAtom = atom<CenterLogoConfig>(defaultCenterLogoConfig);
+
+export interface QrSharedCustomizerState {
+  correctLevel?: string;
+  foregroundColor?: string;
+  positioningColor?: string;
+  backgroundColor?: string;
+}
+
+export const activeStyleAtom = atom<string>("a1");
+export const sharedCustomizerAtom = atom<QrSharedCustomizerState>({
+  correctLevel: "medium",
+});

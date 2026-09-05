@@ -13,10 +13,14 @@ import { Container } from "@/components/Containers";
 import React, { useRef } from "react";
 import { useDraggable } from "react-use-draggable-scroll";
 import { TrackLink } from "@/components/TrackComponents";
+import { useAtom } from "jotai";
+import { activeStyleAtom } from "@/lib/states";
+import { useLocale } from "next-intl";
 
 export function SectionStylesClient() {
   const t = useTranslations("index.style");
-  const currentQrcodeType = useCurrentQrcodeType();
+  const [activeStyle, setActiveStyle] = useAtom(activeStyleAtom);
+  const locale = useLocale();
 
   const ref =
     useRef<HTMLDivElement>() as React.MutableRefObject<HTMLInputElement>;
@@ -24,23 +28,30 @@ export function SectionStylesClient() {
     applyRubberBandEffect: true, // activate rubber band effect
   });
 
+  const handleSelectStyle = (itemId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    setActiveStyle(itemId);
+    const itemPath = itemId === "a1" ? `/${locale}` : `/${locale}/style/${itemId}`;
+    try {
+      window.history.replaceState(null, "", itemPath);
+    } catch {
+      // safe fallback
+    }
+  };
+
   const render = (item: QrStyleItemProps, index: number) => {
     const itemPath = item.id === "a1" ? "/" : `/style/${item.id}`;
-    const isActive = currentQrcodeType === item.id;
+    const isActive = activeStyle === item.id;
     return (
       <div
         key={"qrcode_style_" + index}
         className={cn(
-          "snap-start pl-6 -ml-3 sm:pl-0 sm:ml-0 transition-opacity",
+          "snap-start pl-6 -ml-3 sm:pl-0 sm:ml-0 transition-opacity cursor-pointer",
           isActive ? "" : "dark:opacity-70",
         )}
+        onClick={(e) => handleSelectStyle(item.id, e)}
       >
-        <TrackLink
-          trackValue={["qrcode_style", item.id]}
-          href={itemPath}
-          scroll={false}
-          prefetch={false}
-        >
+        <div className="block">
           <motion.div
             className={cn(
               "relative w-[calc((100vw-(12px)*5)/2)] sm:w-[195px] rounded-2xl bg-accent/30 overflow-hidden",
@@ -77,7 +88,7 @@ export function SectionStylesClient() {
               )}
             ></div>
           </motion.div>
-        </TrackLink>
+        </div>
       </div>
     );
   };
