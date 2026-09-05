@@ -23,6 +23,7 @@ import { useAtom } from "jotai";
 import { UrlInput } from "@/components/hero/UrlInput";
 import { HeroLogo } from "@/components/Header";
 import { TrackLink } from "@/components/TrackComponents";
+import { BusinessPresets } from "@/components/BusinessPresets";
 
 export function SectionHero() {
   const t = useTranslations("index.hero");
@@ -66,7 +67,8 @@ export function SectionHero() {
 
           <SplitView className="gap-y-0">
             <SplitLeft>
-              <div className="mt-6 w-full">
+              <BusinessPresets />
+              <div className="mt-5 w-full">
                 <Label className="flex justify-between text-sm font-medium mb-1.5">
                   {t("url")}
                   <div className="flex items-center gap-3">
