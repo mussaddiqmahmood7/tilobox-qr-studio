@@ -40,6 +40,22 @@ export async function generateMetadata({
       description:
         "Generate stunning, scannable custom QR codes for digital restaurant menus, barber booking, taxi cards, and guest Wi-Fi. 100% in-browser, free, and no database required.",
     },
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: "TiloBox QR Studio",
+    },
+    icons: {
+      icon: [
+        { url: "/icon.svg", type: "image/svg+xml" },
+        { url: "/favicon.ico", sizes: "any" },
+        { url: "/assets/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+        { url: "/assets/favicon/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      ],
+      apple: [
+        { url: "/assets/favicon/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      ],
+    },
   };
 }
 
@@ -60,6 +76,22 @@ export const layoutMetadata: Metadata = {
     "WiFi QR",
     "vCard QR",
   ],
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "TiloBox QR Studio",
+  },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/assets/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/assets/favicon/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [
+      { url: "/assets/favicon/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   openGraph: {
     title: "TiloBox QR Studio – Free Parametric & Artistic QR Code Generator",
     description:
@@ -81,10 +113,13 @@ export function LayoutHead() {
   return (
     // eslint-disable-next-line @next/next/no-head-element
     <head>
-      <link rel="manifest" href="/manifest.json" />
+      <link rel="manifest" href="/manifest.webmanifest" />
       <link rel="icon" href="/favicon.ico" sizes="any" />
       <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+      <link rel="apple-touch-icon" href="/assets/favicon/apple-touch-icon.png" />
       <meta content="yes" name="apple-mobile-web-app-capable" />
+      <meta content="default" name="apple-mobile-web-app-status-bar-style" />
+      <meta content="TiloBox QR Studio" name="apple-mobile-web-app-title" />
       <meta name="theme-color" content="#0b5fa5" />
     </head>
   );

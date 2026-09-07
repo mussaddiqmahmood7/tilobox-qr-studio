@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Github, Menu, ShieldCheck, Sparkles } from "lucide-react";
+import PwaStatusBadge from "@/components/PwaStatusBadge";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -41,6 +42,8 @@ export function Header() {
 
           {/* Desktop Controls (matches my-invoice-app) */}
           <div className="hidden items-center gap-2.5 sm:flex">
+            <PwaStatusBadge />
+
             <LocaleSwitcher />
 
             <div className="h-4 w-[1px] bg-border/60" />
@@ -61,6 +64,7 @@ export function Header() {
 
           {/* Mobile Controls (Smooth Sheet drawer overlay) */}
           <div className="flex items-center gap-2 sm:hidden">
+            <PwaStatusBadge />
             <ThemeSwitcher />
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
@@ -93,6 +97,9 @@ export function Header() {
                   </SheetHeader>
 
                   <div className="flex flex-col gap-5 pt-2">
+                    {/* PWA Offline / Install Actions */}
+                    <PwaStatusBadge variant="drawer" />
+
                     {/* Language Setting */}
                     <div className="flex flex-col gap-2">
                       <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">

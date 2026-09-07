@@ -7,6 +7,7 @@ import { Provider } from "jotai";
 import MixpanelAnalytics from "@/components/MixpanelAnalytics";
 
 import { Toaster } from "@/components/ui/sonner";
+import { PwaProvider } from "@/contexts/PwaContext";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -16,17 +17,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      <Provider>
-        {children}
-        <Toaster
-          position="top-center"
-          richColors
-          toastOptions={{
-            style: {},
-            className: "my-toast",
-          }}
-        />
-      </Provider>
+      <PwaProvider>
+        <Provider>
+          {children}
+          <Toaster
+            position="top-center"
+            richColors
+            toastOptions={{
+              style: {},
+              className: "my-toast",
+            }}
+          />
+        </Provider>
+      </PwaProvider>
       <MixpanelAnalytics />
     </NextThemesProvider>
   );
