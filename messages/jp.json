@@ -124,6 +124,8 @@
     "c2": {
       "title": "C2",
       "subtitle": "コントラストイメージマトリクス",
+      "none": "なし",
+      "black_white": "白黒",
       "contrast": {
         "label": "コントラスト",
         "desc": ""

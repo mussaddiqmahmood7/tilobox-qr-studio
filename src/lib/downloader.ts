@@ -103,7 +103,12 @@ export async function svgToSvg(
     resolvedConfig = { ...logoConfig, url: inlinedUrl };
   }
 
-  const finalSvg = resolvedConfig?.url ? embedLogoInSvg(el, resolvedConfig) : el;
+  const finalSvg = resolvedConfig?.url
+    ? embedLogoInSvg(el, resolvedConfig)
+    : (el.cloneNode(true) as SVGSVGElement);
+  finalSvg.setAttribute("width", "1000");
+  finalSvg.setAttribute("height", "1000");
+
   const svgHead =
     '<?xml version="1.0" encoding="utf-8"?>\n ' +
     '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">\n';

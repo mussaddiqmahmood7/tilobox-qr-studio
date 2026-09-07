@@ -126,6 +126,8 @@
     "c2": {
       "title": "C2",
       "subtitle": "Contrast Image Matrix",
+      "none": "None",
+      "black_white": "Black & White",
       "contrast": {
         "label": "Contrast",
         "desc": ""
@@ -140,12 +142,12 @@
         "button_label": "Upload"
       },
       "align_type": {
-        "label": "Align Type",
-        "desc": ""
+        "label": "Alignment Type",
+        "desc": "Control alignment pattern rendering"
       },
       "timing_type": {
         "label": "Timing Type",
-        "desc": ""
+        "desc": "Control timing pattern style"
       }
     },
     "sp1": {

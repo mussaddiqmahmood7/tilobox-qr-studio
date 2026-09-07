@@ -1232,14 +1232,16 @@ export function TentCardExportModal({
           </div>
 
           {/* Right Live Preview Column: Stationary & Non-scrolling on desktop */}
-          <div className="lg:col-span-6 flex flex-col items-center justify-between p-4 bg-muted/30 rounded-2xl border border-border/60 shrink-0 select-none overflow-hidden lg:sticky lg:top-0 h-full">
-            <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+          <div className="lg:col-span-6 flex flex-col items-center justify-between p-3 sm:p-4 bg-muted/30 rounded-2xl border border-border/60 shrink-0 select-none min-h-0 h-full overflow-hidden lg:sticky lg:top-0">
+            <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 sm:mb-2 shrink-0">
               Live Card Preview (300 DPI Aspect)
             </div>
 
-            {/* Live rendered Card Container */}
-            <div className="flex-1 flex items-center justify-center p-2 max-w-full overflow-hidden scale-[0.82] sm:scale-[0.88] xl:scale-95 origin-center">
-              {renderCardContent()}
+            {/* Live rendered Card Container with responsive auto-fit (zero top/bottom cutoff) */}
+            <div className="flex-1 w-full min-h-0 flex items-center justify-center overflow-y-auto overflow-x-hidden py-1">
+              <div className="scale-[0.66] sm:scale-[0.72] lg:scale-[0.74] xl:scale-[0.80] origin-center shrink-0 -my-20 sm:-my-16 lg:-my-14 xl:-my-10 transition-transform">
+                {renderCardContent()}
+              </div>
             </div>
 
             {/* Download Action right under preview */}

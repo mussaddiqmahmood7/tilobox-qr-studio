@@ -124,6 +124,8 @@
     "c2": {
       "title": "C2",
       "subtitle": "高对比点阵",
+      "none": "无",
+      "black_white": "黑白",
       "contrast": {
         "label": "对比度",
         "desc": ""

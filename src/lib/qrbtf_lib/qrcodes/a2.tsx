@@ -665,9 +665,9 @@ function QrbtfRendererA2(props: RendererProps<QrbtfRendererA2Props>) {
     typeTable,
   ]);
 
-  const viewBox = `${-table.length / 5} ${-table.length / 5} ${
-    (7 * table.length) / 5
-  } ${(7 * table.length) / 5}`;
+  const margin = 1.5;
+  const total = table.length + margin * 2;
+  const viewBox = `${-margin} ${-margin} ${total} ${total}`;
 
   return (
     <svg

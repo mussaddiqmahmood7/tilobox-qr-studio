@@ -210,9 +210,9 @@ function QrbtfRendererC2(props: RendererProps<QrbtfRendererC2Props>) {
     };
   }, [background, brightness, contrast, table.length]);
 
-  const viewBox = `${(-table.length * 3) / 5} ${(-table.length * 3) / 5} ${
-    (21 * table.length) / 5
-  } ${(21 * table.length) / 5}`;
+  const margin = 4.5;
+  const total = table.length * 3 + margin * 2;
+  const viewBox = `${-margin} ${-margin} ${total} ${total}`;
 
   return (
     <svg

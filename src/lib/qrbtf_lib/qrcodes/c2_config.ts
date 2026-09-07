@@ -63,11 +63,11 @@ export function useC2Params() {
       config: {
         values: [
           {
-            label: "无",
+            label: t("none"),
             value: "none",
           },
           {
-            label: "黑白",
+            label: t("black_white"),
             value: "black-white",
           },
         ],
@@ -81,11 +81,11 @@ export function useC2Params() {
       config: {
         values: [
           {
-            label: "无",
+            label: t("none"),
             value: "none",
           },
           {
-            label: "黑白",
+            label: t("black_white"),
             value: "black-white",
           },
         ],

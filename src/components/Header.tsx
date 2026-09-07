@@ -13,7 +13,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Github, Menu, ExternalLink, ShieldCheck, Sparkles } from "lucide-react";
+import { Github, Menu, ShieldCheck, Sparkles } from "lucide-react";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -58,16 +58,6 @@ export function Header() {
               title="Star on GitHub"
             >
               <Github className="h-4 w-4" />
-            </a>
-
-            <a
-              href="https://tilobox.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground border border-primary/20 transition-all px-3 py-2 shadow-2xs"
-            >
-              <span>tilobox.com</span>
-              <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>
 
@@ -132,20 +122,6 @@ export function Header() {
                           <span>GitHub Repository</span>
                         </div>
                         <span className="text-xs font-semibold text-primary">⭐ Star</span>
-                      </a>
-
-                      <a
-                        href="https://tilobox.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex items-center justify-between rounded-xl border border-border bg-card/60 px-3.5 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-card"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <ExternalLink className="h-4 w-4 text-primary" />
-                          <span>TiloBox Platform</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">Directory</span>
                       </a>
                     </div>
 

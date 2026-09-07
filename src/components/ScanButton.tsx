@@ -15,112 +15,171 @@ export function ScanButton(props: { name: string }) {
   const [isScanning, setIsScanning] = useState(false);
 
   /**
+   * Multi-threshold adaptive binarizer and contrast enhancer for jsQR.
+   * Enables decoding of artistic colored QR codes (Gold, Violet, Emerald, Linen)
+   * and dark inverted themes (Midnight Cyber).
+   */
+  const tryDecodeImageData = (
+    data: Uint8ClampedArray,
+    width: number,
+    height: number,
+  ): string | null => {
+    // Pass 1: Raw native scan
+    let result = jsQR(data, width, height, {
+      inversionAttempts: "attemptBoth",
+    });
+    if (result && result.data) return result.data;
+
+    // Pass 2: Multi-threshold adaptive binarization for colored/low-contrast modules
+    const thresholds = [130, 160, 190, 220];
+    for (const th of thresholds) {
+      const bin = new Uint8ClampedArray(data.length);
+      for (let i = 0; i < width * height; i++) {
+        const idx = i * 4;
+        const lum =
+          (data[idx] * 299 + data[idx + 1] * 587 + data[idx + 2] * 114) / 1000;
+        const v = lum < th ? 0 : 255;
+        bin[idx] = v;
+        bin[idx + 1] = v;
+        bin[idx + 2] = v;
+        bin[idx + 3] = 255;
+      }
+      result = jsQR(bin, width, height, { inversionAttempts: "attemptBoth" });
+      if (result && result.data) return result.data;
+    }
+
+    // Pass 3: Inverted binarization for dark theme cards & negative QR patterns
+    for (const th of thresholds) {
+      const bin = new Uint8ClampedArray(data.length);
+      for (let i = 0; i < width * height; i++) {
+        const idx = i * 4;
+        const lum =
+          (data[idx] * 299 + data[idx + 1] * 587 + data[idx + 2] * 114) / 1000;
+        const v = lum > th ? 0 : 255;
+        bin[idx] = v;
+        bin[idx + 1] = v;
+        bin[idx + 2] = v;
+        bin[idx + 3] = 255;
+      }
+      result = jsQR(bin, width, height, { inversionAttempts: "attemptBoth" });
+      if (result && result.data) return result.data;
+    }
+
+    return null;
+  };
+
+  /**
    * Robust multi-pass client-side QR decoder:
-   * 1. Native resolution scan with jsQR (supports both light and dark inverted patterns)
-   * 2. Scaled scan (optimal 800-1200px range for 2K/4K exports)
-   * 3. Center/display-card crop (for detecting QR codes on tent cards & table signage)
-   * 4. Secondary fallback to Html5Qrcode engine
+   * 1. SVG text normalization (injects explicit 1200x1200 dimensions if missing)
+   * 2. Full image multi-scale scan with adaptive thresholding
+   * 3. Table Tent / Display Card center box crop (isolates QR from venue borders & headers)
+   * 4. Secondary fallback to Html5Qrcode engine in an 800x800 container
    */
   const decodeQrFromImage = async (file: File): Promise<string | null> => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const dataUrl = event.target?.result as string;
-        if (!dataUrl) {
-          resolve(null);
-          return;
+    try {
+      // 1. Prepare image Data URL with SVG normalization
+      let dataUrl: string;
+      const isSvg =
+        file.type === "image/svg+xml" || file.name.toLowerCase().endsWith(".svg");
+
+      if (isSvg) {
+        let svgText = await file.text();
+        // Inject explicit width & height if missing so browser Image renders full resolution
+        if (!svgText.includes('width="') && !svgText.includes("width='")) {
+          svgText = svgText.replace("<svg", '<svg width="1200" height="1200"');
         }
+        dataUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgText);
+      } else {
+        dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target?.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
 
-        const img = new Image();
-        img.onload = async () => {
-          try {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d", { willReadFrequently: true });
-            if (!ctx) {
-              resolve(null);
-              return;
-            }
+      if (!dataUrl) return null;
 
-            const origW = img.naturalWidth || img.width;
-            const origH = img.naturalHeight || img.height;
+      // 2. Load into HTML Image
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = dataUrl;
+      });
 
-            // Strategy 1: Optimal Resized Scan (prevents blowout on 4K images while keeping detail)
-            const targetWidths = [origW, 1024, 800, 600];
-            for (const w of targetWidths) {
-              if (w > origW && w !== origW) continue;
-              const scale = w / origW;
-              const h = Math.round(origH * scale);
+      const origW = img.naturalWidth || img.width || 1200;
+      const origH = img.naturalHeight || img.height || 1200;
 
-              canvas.width = w;
-              canvas.height = h;
-              ctx.clearRect(0, 0, w, h);
-              ctx.fillStyle = "#ffffff";
-              ctx.fillRect(0, 0, w, h);
-              ctx.drawImage(img, 0, 0, w, h);
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) return null;
 
-              const imgData = ctx.getImageData(0, 0, w, h);
-              const result = jsQR(imgData.data, w, h, {
-                inversionAttempts: "attemptBoth",
-              });
+      // 3. Define inspection regions: Full Image, Display Card Center, and Tight Center
+      const regions = [
+        { name: "Full Image", x: 0, y: 0, w: origW, h: origH },
+        {
+          name: "Card Center Box",
+          x: Math.round(origW * 0.15),
+          y: Math.round(origH * 0.2),
+          w: Math.round(origW * 0.7),
+          h: Math.round(origH * 0.55),
+        },
+        {
+          name: "Tight Center Box",
+          x: Math.round(origW * 0.2),
+          y: Math.round(origH * 0.25),
+          w: Math.round(origW * 0.6),
+          h: Math.round(origH * 0.5),
+        },
+      ];
 
-              if (result && result.data) {
-                resolve(result.data);
-                return;
-              }
-            }
+      for (const region of regions) {
+        const targetWidths = [region.w, 1024, 800, 600];
+        for (const targetW of targetWidths) {
+          if (targetW > region.w && targetW !== region.w) continue;
+          const scale = targetW / region.w;
+          const targetH = Math.round(region.h * scale);
 
-            // Strategy 2: Center Region Crop (specifically for Display Cards / Table Tents)
-            // Where the QR code is centered inside a decorative border
-            const cropW = Math.round(origW * 0.7);
-            const cropH = Math.round(origH * 0.7);
-            const cropX = Math.round((origW - cropW) / 2);
-            const cropY = Math.round(origH * 0.2); // Slightly higher for cards with header
+          canvas.width = targetW;
+          canvas.height = targetH;
+          ctx.clearRect(0, 0, targetW, targetH);
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, targetW, targetH);
+          ctx.drawImage(
+            img,
+            region.x,
+            region.y,
+            region.w,
+            region.h,
+            0,
+            0,
+            targetW,
+            targetH,
+          );
 
-            canvas.width = cropW;
-            canvas.height = cropH;
-            ctx.clearRect(0, 0, cropW, cropH);
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, cropW, cropH);
-            ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+          const imgData = ctx.getImageData(0, 0, targetW, targetH);
+          const decoded = tryDecodeImageData(imgData.data, targetW, targetH);
+          if (decoded) return decoded;
+        }
+      }
 
-            const croppedData = ctx.getImageData(0, 0, cropW, cropH);
-            const cropResult = jsQR(croppedData.data, cropW, cropH, {
-              inversionAttempts: "attemptBoth",
-            });
+      // 4. Fallback to Html5Qrcode engine in properly-sized container
+      try {
+        const { Html5Qrcode } = await import("html5-qrcode");
+        const scanner = new Html5Qrcode("qr-scan-hidden-container");
+        const fallbackText = await scanner.scanFile(file, false);
+        scanner.clear();
+        if (fallbackText) return fallbackText;
+      } catch {
+        // Silent catch for secondary engine
+      }
 
-            if (cropResult && cropResult.data) {
-              resolve(cropResult.data);
-              return;
-            }
-
-            // Strategy 3: Fallback to Html5Qrcode engine without DOM injection
-            try {
-              const { Html5Qrcode } = await import("html5-qrcode");
-              const scanner = new Html5Qrcode("qr-scan-hidden-container");
-              const fallbackText = await scanner.scanFile(file, false);
-              scanner.clear();
-              if (fallbackText) {
-                resolve(fallbackText);
-                return;
-              }
-            } catch {
-              // Html5Qrcode fallback silent catch
-            }
-
-            resolve(null);
-          } catch (err) {
-            console.warn("Scan decode error:", err);
-            resolve(null);
-          }
-        };
-
-        img.onerror = () => resolve(null);
-        img.src = dataUrl;
-      };
-
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(file);
-    });
+      return null;
+    } catch (err) {
+      console.warn("QR Scan decode error:", err);
+      return null;
+    }
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,13 +198,16 @@ export function ScanButton(props: { name: string }) {
         toast.success("QR code decoded successfully!", { id: toastId });
         trackEvent("scan_qrcode_success");
       } else {
-        toast.error("No readable QR code found. Please ensure the QR is clear and uncropped.", { id: toastId });
+        toast.error(
+          "No readable QR code found. Please ensure the QR is clear and uncropped.",
+          { id: toastId },
+        );
       }
     } catch (err: unknown) {
       console.warn("QR Scan error:", err);
       toast.error(
         "Could not detect a valid QR code. Please ensure the QR is clearly visible and well-lit.",
-        { id: toastId }
+        { id: toastId },
       );
     } finally {
       setIsScanning(false);
@@ -157,10 +219,10 @@ export function ScanButton(props: { name: string }) {
 
   return (
     <>
-      {/* Offscreen dedicated container for Html5Qrcode engine (NOT display:none to allow layout calculation) */}
+      {/* Offscreen dedicated container for Html5Qrcode engine (800x800 ensures proper internal canvas sizing) */}
       <div
         id="qr-scan-hidden-container"
-        className="fixed -left-[9999px] -top-[9999px] w-[10px] h-[10px] opacity-0 pointer-events-none"
+        className="fixed -left-[9999px] -top-[9999px] w-[800px] h-[800px] opacity-0 pointer-events-none"
         aria-hidden="true"
       />
 
@@ -168,7 +230,7 @@ export function ScanButton(props: { name: string }) {
         ref={scanRef}
         id="qr-input-file"
         type="file"
-        accept="image/*"
+        accept="image/*,.svg"
         className="hidden"
         onChange={handleFileChange}
       />
