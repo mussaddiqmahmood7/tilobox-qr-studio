@@ -1,4 +1,3 @@
-import { Container } from "@/components/Containers";
 import { BrandMark } from "@/components/BrandMark";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
@@ -7,9 +6,9 @@ import { Github } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="no-print border-t border-border bg-card/30 backdrop-blur-xs mt-16 py-10">
-      <Container>
-        <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
+    <footer className="no-print border-t border-border bg-card/30 backdrop-blur-xs mt-12">
+      <div className="w-full flex justify-center px-6 lg:px-12">
+        <div className="w-full max-w-5xl flex flex-col items-center justify-between gap-4 py-8 text-sm text-muted-foreground sm:flex-row">
           <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
             <a
               href="https://tilobox.com"
@@ -23,8 +22,8 @@ export function Footer() {
               </span>
             </a>
             <span className="hidden text-border sm:inline">•</span>
-            <p className="text-center sm:text-start text-xs sm:text-sm text-muted-foreground">
-              Powered by open-source QRBTF parametric algorithms • Enhanced, Maintained & Customized by{" "}
+            <p className="text-center sm:text-start text-xs sm:text-sm">
+              Built with open-source love • Based on QRBTF • Maintained & Enhanced by{" "}
               <a
                 href="https://tilobox.com"
                 target="_blank"
@@ -36,21 +35,21 @@ export function Footer() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm text-muted-foreground">
-            <LocaleSwitcher />
-            <ThemeSwitcher />
+          <nav className="flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm">
+            <LocaleSwitcher side="top" />
+            <ThemeSwitcher side="top" />
             <a
               href="https://github.com/mussaddiqmahmood7/tilobox-qr-studio"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-primary ml-1"
+              className="inline-flex items-center gap-1.5 font-medium text-muted-foreground transition-colors hover:text-primary ml-1"
             >
-              <Github className="h-4 w-4" />
-              GitHub
+              <Github className="h-3.5 w-3.5" />
+              GitHub Repository
             </a>
-          </div>
+          </nav>
         </div>
-      </Container>
+      </div>
     </footer>
   );
 }

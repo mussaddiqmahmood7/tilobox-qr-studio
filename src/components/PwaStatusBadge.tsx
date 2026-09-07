@@ -57,7 +57,7 @@ export default function PwaStatusBadge({ variant = "default" }: PwaStatusBadgePr
           >
             <div className="flex items-center gap-2">
               <Download className="h-4 w-4" />
-              <span>Install TiloBox App</span>
+              <span>Make It Offline</span>
             </div>
             <span className="text-xs font-medium opacity-80">Offline Ready</span>
           </button>
@@ -93,16 +93,16 @@ export default function PwaStatusBadge({ variant = "default" }: PwaStatusBadgePr
         </button>
       )}
 
-      {/* 3. PWA Make It Offline / Install Button */}
+      {/* 3. PWA Make It Offline Button */}
       {isInstallable && (
         <button
           type="button"
           onClick={() => promptInstall()}
           className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary transition-all hover:bg-primary hover:text-primary-foreground shadow-2xs"
-          title="Install TiloBox QR Studio for full offline access on desktop or mobile"
+          title="Make TiloBox QR Studio available offline on your desktop or phone"
         >
           <Download className="h-3.5 w-3.5" />
-          <span>Install App</span>
+          <span>Make It Offline</span>
         </button>
       )}
     </div>

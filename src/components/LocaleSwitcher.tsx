@@ -26,11 +26,13 @@ export const LANGUAGES: LanguageOption[] = [
 
 export interface LocaleSwitcherProps {
   variant?: "pill" | "block";
+  side?: "top" | "bottom" | "left" | "right";
   className?: string;
 }
 
 export default function LocaleSwitcher({
   variant = "pill",
+  side = "bottom",
   className,
 }: LocaleSwitcherProps) {
   const currentLocale = useLocale();
@@ -99,6 +101,8 @@ export default function LocaleSwitcher({
       </PopoverTrigger>
 
       <PopoverContent
+        side={side}
+        sideOffset={8}
         align={variant === "block" ? "center" : "end"}
         className="w-56 border-border bg-card p-1.5 shadow-xl"
       >

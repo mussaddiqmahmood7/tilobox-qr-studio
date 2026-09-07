@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
@@ -87,7 +87,12 @@ export function applyTiloBoxTheme(themeId: TiloBoxThemeId) {
   }
 }
 
-export function ThemeSwitcher() {
+export interface ThemeSwitcherProps {
+  side?: "top" | "bottom" | "left" | "right";
+  className?: string;
+}
+
+export function ThemeSwitcher({ side = "bottom", className }: ThemeSwitcherProps = {}) {
   const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
@@ -169,6 +174,8 @@ export function ThemeSwitcher() {
       </PopoverTrigger>
 
       <PopoverContent
+        side={side}
+        sideOffset={8}
         align="end"
         className="w-64 border-border bg-card p-2 shadow-xl"
       >
