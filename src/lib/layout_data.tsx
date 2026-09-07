@@ -33,12 +33,21 @@ export async function generateMetadata({
         "Generate stunning, scannable custom QR codes for digital restaurant menus, barber booking, taxi cards, and guest Wi-Fi. 100% in-browser, free, and no database required.",
       siteName: "TiloBox QR Studio",
       type: "website",
+      images: [
+        {
+          url: "/assets/img/tilobox-banner.png",
+          width: 1376,
+          height: 768,
+          alt: "TiloBox QR Studio – The Designer's Studio for Custom QR Codes",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: "TiloBox QR Studio – Free Parametric & Artistic QR Code Generator",
       description:
         "Generate stunning, scannable custom QR codes for digital restaurant menus, barber booking, taxi cards, and guest Wi-Fi. 100% in-browser, free, and no database required.",
+      images: ["/assets/img/tilobox-banner.png"],
     },
     appleWebApp: {
       capable: true,
@@ -96,6 +105,21 @@ export const layoutMetadata: Metadata = {
     title: "TiloBox QR Studio – Free Parametric & Artistic QR Code Generator",
     description:
       "The Designer's Studio for Custom-Shaped & Geometric QR Codes. 100% in-browser, free, and no database required.",
+    images: [
+      {
+        url: "/assets/img/tilobox-banner.png",
+        width: 1376,
+        height: 768,
+        alt: "TiloBox QR Studio – The Designer's Studio for Custom QR Codes",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TiloBox QR Studio – Free Parametric & Artistic QR Code Generator",
+    description:
+      "The Designer's Studio for Custom-Shaped & Geometric QR Codes. 100% in-browser, free, and no database required.",
+    images: ["/assets/img/tilobox-banner.png"],
   },
 };
 

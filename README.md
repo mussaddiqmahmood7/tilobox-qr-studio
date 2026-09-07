@@ -1,6 +1,21 @@
-﻿# TiloBox QR Studio
+<p align="center">
+  <a href="https://qr.tilobox.com" target="_blank" rel="noopener noreferrer">
+    <img src="public/assets/img/tilobox-banner.png" alt="TiloBox QR Studio Banner" width="100%" style="border-radius: 12px;" />
+  </a>
+</p>
 
-> **The Designer\'s Studio for Custom-Shaped & Geometric QR Codes**  
+<div align="center">
+
+# TiloBox QR Studio
+
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-TiloBox%20Ecosystem-0b5fa5)](https://tilobox.com)
+[![Privacy](https://img.shields.io/badge/Privacy-100%25%20In--Browser-10b981)](#-features)
+[![Next.js](https://img.shields.io/badge/Next.js-14.1.4-black)](https://nextjs.org)
+
+</div>
+
+> **The Designer's Studio for Custom-Shaped & Geometric QR Codes**  
 > An agency-grade, client-side parametric QR generator running 100% in-browser with **zero required environment variables** and **zero external database connections**. Part of the official [TiloBox Ecosystem](https://tilobox.com).
 
 ---
