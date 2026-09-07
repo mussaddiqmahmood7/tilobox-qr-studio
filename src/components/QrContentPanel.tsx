@@ -14,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ScanButton } from "@/components/ScanButton";
 import {
   Link2,
   MessageCircle,
@@ -26,7 +25,6 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
-  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -267,11 +265,10 @@ export function QrContentPanel() {
 
   return (
     <div className="w-full bg-card/60 border border-border/80 rounded-xl p-3 sm:p-4 shadow-2xs backdrop-blur-xs">
-      {/* Top Header: Content Category Tabs & Scan Button */}
+      {/* Top Header: Content Category Tabs & Live Validation */}
       <div className="flex items-center justify-between gap-2 pb-2 border-b border-border/60">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-primary" />
+          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
             Content
           </span>
           {/* Live Real-Time Validation Pill */}
@@ -290,11 +287,6 @@ export function QrContentPanel() {
             )}
             <span>{validationStatus.message}</span>
           </div>
-        </div>
-
-        {/* Scan Existing QR Code Button */}
-        <div className="flex items-center gap-1.5 shrink-0">
-          <ScanButton name="Scan QR" />
         </div>
       </div>
 

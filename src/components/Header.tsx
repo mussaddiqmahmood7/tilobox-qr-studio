@@ -40,10 +40,8 @@ export function Header() {
           </Link>
 
           {/* Desktop Controls (matches my-invoice-app) */}
-          <div className="hidden items-center gap-3 sm:flex">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <LocaleSwitcher />
-            </div>
+          <div className="hidden items-center gap-2.5 sm:flex">
+            <LocaleSwitcher />
 
             <div className="h-4 w-[1px] bg-border/60" />
 
@@ -100,9 +98,7 @@ export function Header() {
                       <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                         Language
                       </span>
-                      <div className="border border-border/80 rounded-xl p-2 bg-card/50">
-                        <LocaleSwitcher />
-                      </div>
+                      <LocaleSwitcher variant="block" />
                     </div>
 
                     {/* Ecosystem Links */}

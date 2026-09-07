@@ -1,4 +1,4 @@
-﻿import { Container } from "@/components/Containers";
+import { Container } from "@/components/Containers";
 import { BrandMark } from "@/components/BrandMark";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
@@ -36,25 +36,17 @@ export function Footer() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 text-xs sm:text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm text-muted-foreground">
             <LocaleSwitcher />
             <ThemeSwitcher />
             <a
               href="https://github.com/mussaddiqmahmood7/tilobox-qr-studio"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-primary"
+              className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-primary ml-1"
             >
               <Github className="h-4 w-4" />
               GitHub
-            </a>
-            <a
-              href="https://tilobox.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium transition-colors hover:text-primary"
-            >
-              TiloBox Directory
             </a>
           </div>
         </div>
